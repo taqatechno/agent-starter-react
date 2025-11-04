@@ -29,11 +29,11 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
   supportsScreenShare: true,
   isPreConnectBufferEnabled: true,
 
-  logo: '/lk-logo.svg',
-  accent: '#002cf2',
-  logoDark: '/lk-logo-dark.svg',
-  accentDark: '#1fd5f9',
-  startButtonText: 'Start call',
+  logo: '/logo.jpg',
+  accent: '#9F0B56',
+  logoDark: '/logo.jpg',
+  accentDark: '#9F0B56',
+  startButtonText: 'بدء المكالمة',
 
   // for LiveKit Cloud Sandbox
   sandboxId: undefined,
