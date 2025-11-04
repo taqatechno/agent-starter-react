@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import type { AppConfig } from '@/app-config';
+import { CardsContainer } from '@/components/app/cards-container';
 import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { TileLayout } from '@/components/app/tile-layout';
@@ -125,6 +126,9 @@ export const SessionView = ({
           <AgentControlBar controls={controls} onChatOpenChange={setChatOpen} />
         </div>
       </MotionBottom>
+
+      {/* Interactive Cards Container */}
+      <CardsContainer />
     </section>
   );
 };
