@@ -88,6 +88,16 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
 
   return (
     <div className="bg-background relative flex h-full w-full flex-row overflow-hidden">
+      {/* Logo - fixed at top-left */}
+      <div className="fixed top-6 left-6 z-50">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={appConfig.logo}
+          alt={`${appConfig.companyName} Logo`}
+          className="h-12 w-auto rounded-full shadow-md transition-transform duration-300 hover:scale-110"
+        />
+      </div>
+
       {/* Agent Section - animates width between 100% and 40% */}
       <motion.div
         className="relative h-full"

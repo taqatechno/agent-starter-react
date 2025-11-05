@@ -51,6 +51,9 @@ export function NewViewController() {
           key="welcome"
           {...VIEW_MOTION_PROPS}
           startButtonText={appConfig.startButtonText}
+          logo={appConfig.logo}
+          logoDark={appConfig.logoDark}
+          companyName={appConfig.companyName}
           onStartCall={startSession}
         />
       )}

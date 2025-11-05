@@ -21,15 +21,33 @@ function WelcomeImage() {
 interface WelcomeViewProps {
   startButtonText: string;
   onStartCall: () => void;
+  logo?: string;
+  logoDark?: string;
+  companyName?: string;
 }
 
 export const WelcomeView = ({
   startButtonText,
   onStartCall,
+  logo,
+  logoDark,
+  companyName,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
   return (
     <div ref={ref}>
+      {/* Logo - fixed at top-left */}
+      {logo && (
+        <div className="fixed top-6 left-6 z-50">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logo}
+            alt={`${companyName || 'Company'} Logo`}
+            className="h-12 w-auto rounded-full shadow-md transition-transform duration-300 hover:scale-110"
+          />
+        </div>
+      )}
+
       <section className="bg-background flex min-h-screen flex-col items-center justify-center text-center">
         <WelcomeImage />
 
