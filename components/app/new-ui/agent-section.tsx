@@ -160,7 +160,7 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSecti
       </div>
 
       {/* Control Bar - fixed at bottom */}
-      <div className="relative z-10 px-4 pb-6">
+      <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6">
         <AgentControlBar
           isChatOpen={isChatOpen}
           onChatToggle={onChatToggle}
