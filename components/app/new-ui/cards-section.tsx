@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
+import { X } from '@phosphor-icons/react';
 import { CardGrid } from '@/components/app/new-ui/card-grid';
 import { CardModal } from '@/components/app/new-ui/card-modal';
 import type { Card } from '@/components/app/new-ui/new-session-view';
@@ -12,6 +13,7 @@ interface CardsSectionProps {
   selectedCardId: string | null;
   onCardSelect: (cardId: string) => void;
   onModalClose: () => void;
+  onClose: () => void;
 }
 
 export function CardsSection({
@@ -19,6 +21,7 @@ export function CardsSection({
   selectedCardId,
   onCardSelect,
   onModalClose,
+  onClose,
 }: CardsSectionProps) {
   const room = useRoomContext();
   const { agent } = useVoiceAssistant();
@@ -55,6 +58,26 @@ export function CardsSection({
 
   return (
     <div className="bg-background border-border relative h-full w-full overflow-hidden border-l">
+      {/* Close button - fixed at top-right */}
+      <motion.button
+        type="button"
+        onClick={onClose}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className={cn(
+          'absolute top-4 right-4 z-30',
+          'rounded-full p-2',
+          'bg-background/90 backdrop-blur-sm',
+          'border-border border',
+          'text-muted-foreground hover:text-foreground',
+          'transition-colors',
+          'shadow-md'
+        )}
+        aria-label="Close cards section"
+      >
+        <X className="h-5 w-5" weight="bold" />
+      </motion.button>
+
       {/* Background layer - reduced opacity when modal is open */}
       <motion.div
         className={cn('absolute inset-0 flex items-center justify-center p-6')}

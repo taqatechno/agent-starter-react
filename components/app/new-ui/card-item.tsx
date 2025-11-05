@@ -49,10 +49,10 @@ export function CardItem({ card, onClick }: CardItemProps) {
       className={cn(
         'h-[160px] w-[200px]',
         'flex flex-col p-4',
-        'bg-card border-border rounded-lg border',
+        'bg-card border-border hover:border-primary rounded-lg border-2',
         'cursor-pointer',
         'shadow-md hover:shadow-xl',
-        'transition-shadow duration-200'
+        'transition-all duration-200'
       )}
     >
       <h3 className="text-foreground mb-2 line-clamp-2 text-base font-semibold">{card.title}</h3>

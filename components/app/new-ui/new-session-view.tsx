@@ -80,6 +80,12 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
     setSelectedCardId(null);
   };
 
+  // Handle closing entire cards section
+  const handleCloseCards = () => {
+    setIsCardsVisible(false);
+    setSelectedCardId(null); // Also close any open modal
+  };
+
   return (
     <div className="bg-background relative flex h-full w-full flex-row overflow-hidden">
       {/* Agent Section - animates width between 100% and 40% */}
@@ -118,6 +124,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             selectedCardId={selectedCardId}
             onCardSelect={handleCardSelect}
             onModalClose={handleModalClose}
+            onClose={handleCloseCards}
           />
         </motion.div>
       )}
