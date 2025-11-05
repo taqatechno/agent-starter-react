@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRoomContext, useLocalParticipant } from "@livekit/components-react";
+import { useRoomContext, useLocalParticipant, useVoiceAssistant } from "@livekit/components-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { X, ArrowLeft, ShoppingCart } from "@phosphor-icons/react";
@@ -63,9 +63,9 @@ const MOCK_PRODUCT_DATA: Record<string, Omit<ProductCard, keyof Card>> = {
 export function CardsContainer() {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
+  const { agent } = useVoiceAssistant();
   const [cards, setCards] = useState<Card[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [agent, setAgent] = useState<any>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   // Debug effect to track visibility changes
@@ -73,14 +73,8 @@ export function CardsContainer() {
     console.log(`👁️ CardsContainer visibility changed: ${isVisible}`);
   }, [isVisible]);
 
+  // Register RPC handler for receiving cards from agent
   useEffect(() => {
-    // Find the agent participant
-    const agentParticipant = Array.from(room.remoteParticipants.values()).find(
-      (p) => p.name === "Agent" || p.kind === "agent"
-    );
-    setAgent(agentParticipant);
-
-    // Register RPC handler for receiving cards from agent
     const handleDisplayCards = async (data: any): Promise<string> => {
       try {
         console.log("📨 Received displayCards RPC:", data);
@@ -117,7 +111,8 @@ export function CardsContainer() {
 
     // Cleanup on unmount
     return () => {
-      console.log("🔌 CardsContainer unmounted");
+      console.log("🔌 Unregistering RPC method: client.displayCards");
+      room.localParticipant.unregisterRpcMethod("client.displayCards");
     };
   }, [room]);
 
