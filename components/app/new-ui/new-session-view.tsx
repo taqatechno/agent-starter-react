@@ -9,15 +9,39 @@ import { CardsSection } from '@/components/app/new-ui/cards-section';
 
 // TypeScript interfaces for RPC payload
 export interface Card {
-  id: string;
+  id: string | number;
   title: string;
   description: string;
+  [key: string]: any; // Allow additional fields from backend
 }
 
 interface CardsPayload {
   action: 'show' | 'hide';
-  cards: Card[];
+  cards: any[]; // Accept any backend schema
 }
+
+// Normalize different backend schemas to unified Card interface
+const normalizeCard = (rawCard: any): Card => {
+  // Detect schema type by checking which fields exist
+  const isProject = 'project_name_ar' in rawCard;
+  const isSponsorship = 'category' in rawCard && 'monthly_amount_qar' in rawCard;
+  const isSadaqah = 'suggested_amount_qar' in rawCard;
+
+  // Extract title (name) from appropriate field
+  const title = rawCard.project_name_ar || rawCard.name_ar || 'Untitled';
+
+  // Extract description from appropriate field
+  const description =
+    rawCard.project_description_ar || rawCard.additional_info_ar || rawCard.description_ar || '';
+
+  // Return normalized card with all original fields preserved
+  return {
+    id: rawCard.id,
+    title,
+    description,
+    ...rawCard, // Keep all original fields for flexibility
+  };
+};
 
 interface NewSessionViewProps {
   appConfig: AppConfig;
@@ -42,15 +66,18 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
           typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
 
         if (payload.action === 'show') {
-          setCards(payload.cards);
+          // Normalize cards from different backend schemas
+          const normalizedCards = payload.cards.map(normalizeCard);
+
+          setCards(normalizedCards);
           setIsCardsVisible(true);
           setSelectedCardId(null); // Close any open modal when showing new cards
-          console.log(`✅ Displaying ${payload.cards.length} cards`);
+          console.log(`✅ Displaying ${normalizedCards.length} cards`);
 
           // Return structured response with card IDs and titles
           return JSON.stringify({
             status: 'success',
-            cards: payload.cards.map((card) => ({
+            cards: normalizedCards.map((card) => ({
               id: card.id,
               title: card.title,
             })),

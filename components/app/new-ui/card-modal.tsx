@@ -6,53 +6,6 @@ import { ShoppingCart, X } from '@phosphor-icons/react';
 import type { Card } from '@/components/app/new-ui/new-session-view';
 import { cn } from '@/lib/utils';
 
-// Extended card interface with product details (mock data)
-interface ProductCard extends Card {
-  imageUrl: string;
-  price: string;
-  fullDescription: string;
-  category: string;
-}
-
-// Mock product data - in real app, this would come from backend
-const MOCK_PRODUCT_DATA: Record<string, Omit<ProductCard, keyof Card>> = {
-  'card-1': {
-    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
-    price: '$299.00',
-    fullDescription:
-      'Premium wireless headphones with active noise cancellation, crystal-clear audio, and up to 30 hours of battery life. Perfect for music lovers and professionals alike.',
-    category: 'Electronics',
-  },
-  'card-2': {
-    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop',
-    price: '$149.00',
-    fullDescription:
-      'Stylish and comfortable running shoes designed for performance. Features advanced cushioning technology and breathable materials for maximum comfort during your workouts.',
-    category: 'Footwear',
-  },
-  'card-3': {
-    imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop',
-    price: '$89.00',
-    fullDescription:
-      'Elegant wristwatch combining classic design with modern functionality. Water-resistant and perfect for both casual and formal occasions.',
-    category: 'Accessories',
-  },
-  'card-4': {
-    imageUrl: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&h=300&fit=crop',
-    price: '$199.00',
-    fullDescription:
-      'Smartwatch with fitness tracking, heart rate monitoring, and smartphone notifications. Stay connected and monitor your health throughout the day.',
-    category: 'Electronics',
-  },
-  'card-5': {
-    imageUrl: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=300&fit=crop',
-    price: '$79.00',
-    fullDescription:
-      'Premium backpack with multiple compartments, laptop sleeve, and water-resistant material. Perfect for daily commutes, travel, or outdoor adventures.',
-    category: 'Bags',
-  },
-};
-
 const backdropVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
@@ -90,13 +43,6 @@ interface CardModalProps {
 }
 
 export function CardModal({ card, onClose }: CardModalProps) {
-  // Get full product data with mock details
-  const mockData = MOCK_PRODUCT_DATA[card.id] || MOCK_PRODUCT_DATA['card-1'];
-  const productCard: ProductCard = {
-    ...card,
-    ...mockData,
-  };
-
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -161,33 +107,27 @@ export function CardModal({ card, onClose }: CardModalProps) {
             </motion.button>
           </div>
 
-          {/* Product Image */}
-          <div className="bg-muted relative aspect-[4/3] w-full">
+          {/* Qatar Charity Logo */}
+          <div className="bg-muted relative aspect-[4/3] w-full flex items-center justify-center">
             <img
-              src={productCard.imageUrl}
-              alt={productCard.title}
-              className="h-full w-full object-cover"
+              src="/qatar-charity-logo.jpg"
+              alt="Qatar Charity"
+              className="h-32 w-32 object-contain"
             />
-            <div className="absolute top-3 left-3">
-              <span className="bg-background/90 text-foreground border-border inline-block rounded-full border px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                {productCard.category}
-              </span>
-            </div>
           </div>
 
-          {/* Product Info */}
+          {/* Card Info */}
           <div className="space-y-4 p-6">
-            {/* Title and Price */}
+            {/* Title */}
             <div>
-              <h2 className="text-foreground mb-2 text-2xl font-bold">{productCard.title}</h2>
-              <p className="text-primary text-3xl font-bold">{productCard.price}</p>
+              <h2 className="text-foreground mb-2 text-2xl font-bold">{card.title}</h2>
             </div>
 
             {/* Full Description */}
-            <div className="border-border border-t pt-2">
-              <h3 className="text-foreground mb-2 text-sm font-semibold">Description</h3>
+            <div className="border-border border-t pt-4">
+              <h3 className="text-foreground mb-2 text-sm font-semibold">الوصف</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                {productCard.fullDescription}
+                {card.description}
               </p>
             </div>
 
@@ -205,7 +145,7 @@ export function CardModal({ card, onClose }: CardModalProps) {
               )}
             >
               <ShoppingCart className="h-5 w-5" weight="bold" />
-              Learn More
+              تبرع الآن
             </motion.button>
           </div>
         </div>
