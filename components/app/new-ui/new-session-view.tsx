@@ -78,43 +78,68 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
       }
     };
 
-    const handleOpenCardModal = async (data: any): Promise<string> => {
+    const handleControlCardModal = async (data: any): Promise<string> => {
       try {
-        console.log('📨 Received openCardModal RPC:', data);
+        console.log('📨 Received controlCardModal RPC:', data);
 
         // Parse payload (might be string or object)
-        const payload: { cardId: string } =
+        const payload: { action: 'open' | 'close'; cardId?: string } =
           typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
 
-        // Validate cards are loaded
-        if (cards.length === 0) {
-          console.warn('⚠️ Cannot open modal: No cards available');
+        if (payload.action === 'open') {
+          // Validate cardId is provided
+          if (!payload.cardId) {
+            console.warn('⚠️ Cannot open modal: cardId is required');
+            return JSON.stringify({
+              status: 'error',
+              message: 'cardId is required for open action',
+            });
+          }
+
+          // Validate cards are loaded
+          if (cards.length === 0) {
+            console.warn('⚠️ Cannot open modal: No cards available');
+            return JSON.stringify({
+              status: 'error',
+              message: 'No cards available',
+            });
+          }
+
+          // Validate card exists
+          const cardExists = cards.some((card) => card.id === payload.cardId);
+          if (!cardExists) {
+            console.warn(`⚠️ Cannot open modal: Card "${payload.cardId}" not found`);
+            return JSON.stringify({
+              status: 'error',
+              message: 'Card not found',
+            });
+          }
+
+          // Open modal (auto-closes any existing modal)
+          setSelectedCardId(payload.cardId);
+          console.log(`✅ Opening modal for card: ${payload.cardId}`);
+
           return JSON.stringify({
-            status: 'error',
-            message: 'No cards available',
+            status: 'success',
+            cardId: payload.cardId,
+          });
+        } else if (payload.action === 'close') {
+          // Close modal (idempotent - no error if already closed)
+          setSelectedCardId(null);
+          console.log('✅ Closing modal');
+
+          return JSON.stringify({
+            status: 'success',
           });
         }
 
-        // Validate card exists
-        const cardExists = cards.some((card) => card.id === payload.cardId);
-        if (!cardExists) {
-          console.warn(`⚠️ Cannot open modal: Card "${payload.cardId}" not found`);
-          return JSON.stringify({
-            status: 'error',
-            message: 'Card not found',
-          });
-        }
-
-        // Open modal (auto-closes any existing modal)
-        setSelectedCardId(payload.cardId);
-        console.log(`✅ Opening modal for card: ${payload.cardId}`);
-
+        // Invalid action
         return JSON.stringify({
-          status: 'success',
-          cardId: payload.cardId,
+          status: 'error',
+          message: 'Invalid action. Use "open" or "close"',
         });
       } catch (error) {
-        console.error('❌ Error processing openCardModal:', error);
+        console.error('❌ Error processing controlCardModal:', error);
         return JSON.stringify({
           status: 'error',
           message: error instanceof Error ? error.message : String(error),
@@ -124,15 +149,15 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
 
     // Register the RPC methods
     room.localParticipant.registerRpcMethod('client.displayCards', handleDisplayCards);
-    room.localParticipant.registerRpcMethod('client.openCardModal', handleOpenCardModal);
+    room.localParticipant.registerRpcMethod('client.controlCardModal', handleControlCardModal);
 
-    console.log('🔌 Registered RPC methods: client.displayCards, client.openCardModal');
+    console.log('🔌 Registered RPC methods: client.displayCards, client.controlCardModal');
 
     // Cleanup on unmount
     return () => {
-      console.log('🔌 Unregistering RPC methods: client.displayCards, client.openCardModal');
+      console.log('🔌 Unregistering RPC methods: client.displayCards, client.controlCardModal');
       room.localParticipant.unregisterRpcMethod('client.displayCards');
-      room.localParticipant.unregisterRpcMethod('client.openCardModal');
+      room.localParticipant.unregisterRpcMethod('client.controlCardModal');
     };
   }, [room, cards]);
 
