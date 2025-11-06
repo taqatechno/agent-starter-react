@@ -44,6 +44,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
         if (payload.action === 'show') {
           setCards(payload.cards);
           setIsCardsVisible(true);
+          setSelectedCardId(null); // Close any open modal when showing new cards
           console.log(`✅ Displaying ${payload.cards.length} cards`);
 
           // Return structured response with card IDs and titles
