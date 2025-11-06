@@ -31,7 +31,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-  // Register RPC handler for receiving cards from agent
+  // Register RPC handlers for receiving cards and modal control from agent
   useEffect(() => {
     const handleDisplayCards = async (data: any): Promise<string> => {
       try {
@@ -45,30 +45,96 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
           setCards(payload.cards);
           setIsCardsVisible(true);
           console.log(`✅ Displaying ${payload.cards.length} cards`);
+
+          // Return structured response with card IDs and titles
+          return JSON.stringify({
+            status: 'success',
+            cards: payload.cards.map((card) => ({
+              id: card.id,
+              title: card.title,
+            })),
+          });
         } else if (payload.action === 'hide') {
           setIsCardsVisible(false);
           setSelectedCardId(null); // Reset selection when hiding
           console.log('👋 Hiding cards');
+
+          return JSON.stringify({
+            status: 'success',
+          });
         }
 
-        return 'success';
+        // Invalid action
+        return JSON.stringify({
+          status: 'error',
+          message: 'Invalid action. Use "show" or "hide"',
+        });
       } catch (error) {
         console.error('❌ Error processing displayCards:', error);
-        return 'error: ' + (error instanceof Error ? error.message : String(error));
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     };
 
-    // Register the RPC method
-    room.localParticipant.registerRpcMethod('client.displayCards', handleDisplayCards);
+    const handleOpenCardModal = async (data: any): Promise<string> => {
+      try {
+        console.log('📨 Received openCardModal RPC:', data);
 
-    console.log('🔌 Registered RPC method: client.displayCards');
+        // Parse payload (might be string or object)
+        const payload: { cardId: string } =
+          typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+
+        // Validate cards are loaded
+        if (cards.length === 0) {
+          console.warn('⚠️ Cannot open modal: No cards available');
+          return JSON.stringify({
+            status: 'error',
+            message: 'No cards available',
+          });
+        }
+
+        // Validate card exists
+        const cardExists = cards.some((card) => card.id === payload.cardId);
+        if (!cardExists) {
+          console.warn(`⚠️ Cannot open modal: Card "${payload.cardId}" not found`);
+          return JSON.stringify({
+            status: 'error',
+            message: 'Card not found',
+          });
+        }
+
+        // Open modal (auto-closes any existing modal)
+        setSelectedCardId(payload.cardId);
+        console.log(`✅ Opening modal for card: ${payload.cardId}`);
+
+        return JSON.stringify({
+          status: 'success',
+          cardId: payload.cardId,
+        });
+      } catch (error) {
+        console.error('❌ Error processing openCardModal:', error);
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    // Register the RPC methods
+    room.localParticipant.registerRpcMethod('client.displayCards', handleDisplayCards);
+    room.localParticipant.registerRpcMethod('client.openCardModal', handleOpenCardModal);
+
+    console.log('🔌 Registered RPC methods: client.displayCards, client.openCardModal');
 
     // Cleanup on unmount
     return () => {
-      console.log('🔌 Unregistering RPC method: client.displayCards');
+      console.log('🔌 Unregistering RPC methods: client.displayCards, client.openCardModal');
       room.localParticipant.unregisterRpcMethod('client.displayCards');
+      room.localParticipant.unregisterRpcMethod('client.openCardModal');
     };
-  }, [room]);
+  }, [room, cards]);
 
   // Handle card selection
   const handleCardSelect = (cardId: string) => {
