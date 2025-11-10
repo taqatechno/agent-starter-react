@@ -25,7 +25,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   const [cards, setCards] = useState<Card[]>([]);
   const [isCardsVisible, setIsCardsVisible] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
 
   // Register RPC handler for client.displayCards
   useEffect(() => {
@@ -110,7 +110,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   }, [room, cards]); // Include dependencies
 
   // Handle card selection
-  const handleCardSelect = (cardId: string) => {
+  const handleCardSelect = (cardId: string | number) => {
     setSelectedCardId(cardId);
   };
 

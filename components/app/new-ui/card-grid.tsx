@@ -16,7 +16,7 @@ const containerVariants = {
 
 interface CardGridProps {
   cards: Card[];
-  onCardClick: (cardId: string) => void;
+  onCardClick: (cardId: string | number) => void;
 }
 
 export function CardGrid({ cards, onCardClick }: CardGridProps) {

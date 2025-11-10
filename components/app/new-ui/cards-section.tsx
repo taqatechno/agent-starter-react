@@ -1,6 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
+import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import { X } from '@phosphor-icons/react';
 import { CardGrid } from '@/components/app/new-ui/card-grid';
 import { CardModal } from '@/components/app/new-ui/card-modal';
@@ -9,8 +10,8 @@ import { cn } from '@/lib/utils';
 
 interface CardsSectionProps {
   cards: Card[];
-  selectedCardId: string | null;
-  onCardSelect: (cardId: string) => void;
+  selectedCardId: string | number | null;
+  onCardSelect: (cardId: string | number) => void;
   onModalClose: () => void;
   onClose: () => void;
 }
@@ -22,10 +23,47 @@ export function CardsSection({
   onModalClose,
   onClose,
 }: CardsSectionProps) {
-  // Handle card click - show modal (RPC notification removed)
-  const handleCardClick = (cardId: string) => {
+  const room = useRoomContext();
+  const { agent } = useVoiceAssistant();
+
+  // Handle card click - show modal and send RPC to backend
+  const handleCardClick = async (cardId: string | number) => {
     console.log(`🖱️ User clicked card: ${cardId}`);
+
+    // Find the card to get its title
+    const card = cards.find((c) => String(c.id) === String(cardId));
+
+    // Fail fast if card not found (should never happen - indicates bug)
+    if (!card) {
+      console.error('❌ CRITICAL BUG: Clicked card not found in array!', cardId);
+      return; // Don't send RPC with bad data
+    }
+
+    // 1. Update UI immediately (optimistic update)
     onCardSelect(cardId);
+
+    // 2. Send RPC to backend (non-blocking)
+    if (!agent) {
+      console.warn('⚠️ No agent available to send selection');
+      return;
+    }
+
+    try {
+      const result = await room.localParticipant.performRpc({
+        destinationIdentity: agent.identity,
+        method: 'agent.selectCard',
+        payload: JSON.stringify({
+          cardId: cardId,
+          title: card.title,
+          action: 'select',
+        }),
+      });
+
+      console.log('✅ Agent acknowledged selection:', result);
+    } catch (error) {
+      console.error('❌ Failed to send card selection:', error);
+      // Don't throw - modal is already open, user experience continues
+    }
   };
 
   const selectedCard = selectedCardId !== null ? cards.find((c) => c.id === selectedCardId) : null;
