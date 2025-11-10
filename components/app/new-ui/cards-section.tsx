@@ -28,7 +28,7 @@ export function CardsSection({
     onCardSelect(cardId);
   };
 
-  const selectedCard = selectedCardId ? cards.find((c) => c.id === selectedCardId) : null;
+  const selectedCard = selectedCardId !== null ? cards.find((c) => c.id === selectedCardId) : null;
 
   return (
     <div className="bg-background border-border relative h-full w-full overflow-hidden border-l">
@@ -56,8 +56,8 @@ export function CardsSection({
       <motion.div
         className={cn('absolute inset-0 flex items-center justify-center p-6')}
         animate={{
-          opacity: selectedCardId ? 0.3 : 1,
-          filter: selectedCardId ? 'blur(4px)' : 'blur(0px)',
+          opacity: selectedCardId !== null ? 0.3 : 1,
+          filter: selectedCardId !== null ? 'blur(4px)' : 'blur(0px)',
         }}
         transition={{ duration: 0.2 }}
       >
