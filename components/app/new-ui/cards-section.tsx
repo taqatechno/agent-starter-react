@@ -1,7 +1,6 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import { X } from '@phosphor-icons/react';
 import { CardGrid } from '@/components/app/new-ui/card-grid';
 import { CardModal } from '@/components/app/new-ui/card-modal';
@@ -23,35 +22,10 @@ export function CardsSection({
   onModalClose,
   onClose,
 }: CardsSectionProps) {
-  const room = useRoomContext();
-  const { agent } = useVoiceAssistant();
-
-  // Handle card click - show modal and send RPC to agent
-  const handleCardClick = async (cardId: string) => {
+  // Handle card click - show modal (RPC notification removed)
+  const handleCardClick = (cardId: string) => {
     console.log(`🖱️ User clicked card: ${cardId}`);
-
-    // Show modal immediately
     onCardSelect(cardId);
-
-    // Send RPC call to agent
-    if (!agent) {
-      console.warn('⚠️ No agent available to send selection');
-      return;
-    }
-
-    try {
-      const result = await room.localParticipant.performRpc({
-        destinationIdentity: agent.identity,
-        method: 'agent.selectCard',
-        payload: JSON.stringify({
-          cardId: cardId,
-          action: 'select',
-        }),
-      });
-      console.log('✅ Agent acknowledged selection:', result);
-    } catch (error) {
-      console.error('❌ Failed to send card selection:', error);
-    }
   };
 
   const selectedCard = selectedCardId ? cards.find((c) => c.id === selectedCardId) : null;
