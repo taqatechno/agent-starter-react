@@ -109,6 +109,92 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
     };
   }, [room, cards]); // Include dependencies
 
+  // Register RPC handler for client.controlCardModal
+  useEffect(() => {
+    const handleControlCardModal = async (data: any): Promise<string> => {
+      try {
+        console.log('📨 Received controlCardModal RPC:', data);
+
+        // Parse payload (handles both string and object)
+        const payload: { action: 'open' | 'close'; cardId?: string | number } =
+          typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+
+        // Validate action field
+        if (payload.action !== 'open' && payload.action !== 'close') {
+          console.error('❌ Invalid action:', payload.action);
+          return JSON.stringify({
+            status: 'error',
+            message: "Invalid action. Use 'open' or 'close'",
+          });
+        }
+
+        if (payload.action === 'open') {
+          // Validate cardId is provided
+          if (payload.cardId === undefined || payload.cardId === null) {
+            console.error('❌ Missing cardId for open action');
+            return JSON.stringify({
+              status: 'error',
+              message: "cardId is required for 'open' action",
+            });
+          }
+
+          // Find the card to validate it exists and get its title
+          const card = cards.find((c) => String(c.id) === String(payload.cardId));
+
+          if (!card) {
+            console.error(`❌ Card not found: ${payload.cardId}`);
+            return JSON.stringify({
+              status: 'error',
+              message: `no card with id ${payload.cardId}`,
+            });
+          }
+
+          // Open modal (auto-switches if another is open)
+          setSelectedCardId(payload.cardId);
+          console.log(`✅ Opening modal for card: ${payload.cardId}`);
+
+          // Return success response with message
+          return JSON.stringify({
+            status: 'success',
+            cardId: payload.cardId,
+            message: `card ${payload.cardId}, ${card.title} is open`,
+          });
+        } else if (payload.action === 'close') {
+          // Close modal (idempotent - safe even if no modal is open)
+          setSelectedCardId(null);
+          console.log('✅ Closing modal');
+
+          // Return success response
+          return JSON.stringify({
+            status: 'success',
+          });
+        }
+
+        // Should never reach here due to validation
+        return JSON.stringify({
+          status: 'error',
+          message: 'Unknown action',
+        });
+      } catch (error) {
+        console.error('❌ Error processing controlCardModal:', error);
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    // Register the RPC method
+    room.localParticipant.registerRpcMethod('client.controlCardModal', handleControlCardModal);
+    console.log('🔌 Registered RPC method: client.controlCardModal');
+
+    // Cleanup on unmount
+    return () => {
+      room.localParticipant.unregisterRpcMethod('client.controlCardModal');
+      console.log('🔌 Unregistered RPC method: client.controlCardModal');
+    };
+  }, [room, cards]); // Include dependencies
+
   // Handle card selection
   const handleCardSelect = (cardId: string | number) => {
     setSelectedCardId(cardId);

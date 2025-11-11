@@ -104,7 +104,7 @@ export function CardsSection({
 
       {/* Modal layer - floating above */}
       <AnimatePresence>
-        {selectedCard && <CardModal card={selectedCard} onClose={onModalClose} />}
+        {selectedCard && <CardModal key={selectedCard.id} card={selectedCard} onClose={onModalClose} />}
       </AnimatePresence>
     </div>
   );
