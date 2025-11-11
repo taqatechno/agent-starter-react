@@ -16,10 +16,11 @@ const containerVariants = {
 
 interface CardGridProps {
   cards: Card[];
+  entityType: string;
   onCardClick: (cardId: string | number) => void;
 }
 
-export function CardGrid({ cards, onCardClick }: CardGridProps) {
+export function CardGrid({ cards, entityType, onCardClick }: CardGridProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -29,7 +30,7 @@ export function CardGrid({ cards, onCardClick }: CardGridProps) {
     >
       <div className="flex max-w-4xl flex-row flex-wrap items-center justify-center gap-4">
         {cards.map((card) => (
-          <CardItem key={card.id} card={card} onClick={() => onCardClick(card.id)} />
+          <CardItem key={card.id} card={card} entityType={entityType} onClick={() => onCardClick(card.id)} />
         ))}
       </div>
     </motion.div>

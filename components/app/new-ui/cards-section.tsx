@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 interface CardsSectionProps {
   cards: Card[];
+  entityType: string;
   selectedCardId: string | number | null;
   onCardSelect: (cardId: string | number) => void;
   onModalClose: () => void;
@@ -18,6 +19,7 @@ interface CardsSectionProps {
 
 export function CardsSection({
   cards,
+  entityType,
   selectedCardId,
   onCardSelect,
   onModalClose,
@@ -99,12 +101,14 @@ export function CardsSection({
         }}
         transition={{ duration: 0.2 }}
       >
-        <CardGrid cards={cards} onCardClick={handleCardClick} />
+        <CardGrid cards={cards} entityType={entityType} onCardClick={handleCardClick} />
       </motion.div>
 
       {/* Modal layer - floating above */}
       <AnimatePresence>
-        {selectedCard && <CardModal key={selectedCard.id} card={selectedCard} onClose={onModalClose} />}
+        {selectedCard && (
+          <CardModal key={selectedCard.id} card={selectedCard} entityType={entityType} onClose={onModalClose} />
+        )}
       </AnimatePresence>
     </div>
   );

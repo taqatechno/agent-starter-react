@@ -26,6 +26,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   const [isCardsVisible, setIsCardsVisible] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
+  const [entityType, setEntityType] = useState<string>('');
 
   // Register RPC handler for client.displayCards
   useEffect(() => {
@@ -34,7 +35,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
         console.log('📨 Received displayCards RPC:', data);
 
         // Parse payload (handles both string and object - best practice)
-        const payload: { action: 'show' | 'hide'; cards: any[] } =
+        const payload: { action: 'show' | 'hide'; Type: string; cards: any[] } =
           typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
 
         // Validate action field
@@ -56,25 +57,37 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             });
           }
 
-          // Set cards and make visible
+          // Helper function to extract title based on entity type
+          const extractTitle = (card: any, type: string): string => {
+            if (type === 'faq') {
+              // FAQ uses question.ar
+              return card.question?.ar || card.question || 'Untitled FAQ';
+            }
+            // All others use name.ar (sponsorship, project, charity, atonement)
+            return card.name?.ar || card.name || 'Untitled';
+          };
+
+          // Set cards, entity type, and make visible
           setCards(payload.cards);
+          setEntityType(payload.Type || '');
           setIsCardsVisible(true);
           setSelectedCardId(null); // Auto-close any open modal
 
-          console.log(`✅ Displaying ${payload.cards.length} cards`);
+          console.log(`✅ Displaying ${payload.cards.length} ${payload.Type} cards`);
 
-          // Return success response per contract
+          // Return success response per contract with extracted titles
           return JSON.stringify({
             status: 'success',
             cards: payload.cards.map((card) => ({
               id: card.id,
-              title: card.title,
+              title: extractTitle(card, payload.Type),
             })),
           });
         } else if (payload.action === 'hide') {
           // Hide cards section
           setIsCardsVisible(false);
           setSelectedCardId(null); // Reset selection
+          setEntityType(''); // Clear entity type
 
           console.log('👋 Hiding cards');
 
@@ -256,6 +269,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
         >
           <CardsSection
             cards={cards}
+            entityType={entityType}
             selectedCardId={selectedCardId}
             onCardSelect={handleCardSelect}
             onModalClose={handleModalClose}
