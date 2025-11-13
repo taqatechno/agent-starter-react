@@ -144,9 +144,9 @@ const translateGender = (gender: string | null): string => {
 
 // Field component for consistent styling
 const Field = ({ label, value }: { label: string; value: string | number | null }) => (
-  <div className="space-y-1">
-    <div className="text-muted-foreground text-xs font-medium">{label}</div>
-    <div className="text-foreground text-sm">{value || 'غير محدد'}</div>
+  <div className="space-y-1 text-right">
+    <div className="text-muted-foreground text-xs font-medium text-right">{label}</div>
+    <div className="text-foreground text-sm text-right">{value || 'غير محدد'}</div>
   </div>
 );
 
@@ -194,6 +194,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
         >
           <div
+            dir="rtl"
             className={cn(
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
@@ -231,7 +232,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             </div>
 
             <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold">{name}</h2>
+              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <Field label="الفئة" value={category} />
@@ -242,14 +243,14 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               {additionalInfo && (
                 <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold">معلومات إضافية</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{additionalInfo}</p>
+                  <h3 className="text-foreground text-sm font-semibold text-right">معلومات إضافية</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{additionalInfo}</p>
                 </div>
               )}
 
               <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm">{payment}</div>
+                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
+                <div className="text-muted-foreground text-sm text-right">{payment}</div>
               </div>
 
               <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-xs">
@@ -318,6 +319,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
         >
           <div
+            dir="rtl"
             className={cn(
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
@@ -355,7 +357,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             </div>
 
             <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold">{name}</h2>
+              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <Field label="نوع المشروع" value={type} />
@@ -369,13 +371,13 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               {description && (
                 <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold">الوصف</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                  <h3 className="text-foreground text-sm font-semibold text-right">الوصف</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{description}</p>
                 </div>
               )}
 
               <div className="border-border border-t pt-4 space-y-3">
-                <h3 className="text-foreground text-sm font-semibold">التمويل</h3>
+                <h3 className="text-foreground text-sm font-semibold text-right">التمويل</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">المبلغ المستهدف:</span>
@@ -396,8 +398,8 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
 
               <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm">{payment}</div>
+                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
+                <div className="text-muted-foreground text-sm text-right">{payment}</div>
               </div>
 
               <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-xs">
@@ -460,6 +462,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
         >
           <div
+            dir="rtl"
             className={cn(
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
@@ -503,13 +506,13 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               <div className="space-y-3">
                 <div>
-                  <h3 className="text-foreground mb-2 text-sm font-semibold">السؤال</h3>
-                  <p className="text-foreground text-base leading-relaxed">{question}</p>
+                  <h3 className="text-foreground mb-2 text-sm font-semibold text-right">السؤال</h3>
+                  <p className="text-foreground text-base leading-relaxed text-right">{question}</p>
                 </div>
 
                 <div className="border-border border-t pt-3">
-                  <h3 className="text-foreground mb-2 text-sm font-semibold">الإجابة</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{answer}</p>
+                  <h3 className="text-foreground mb-2 text-sm font-semibold text-right">الإجابة</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{answer}</p>
                 </div>
               </div>
 
@@ -561,6 +564,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
         >
           <div
+            dir="rtl"
             className={cn(
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
@@ -598,7 +602,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             </div>
 
             <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold">{name}</h2>
+              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
 
               <div className="bg-muted/50 rounded-lg p-4">
                 <Field label="نوع الصدقة" value={type} />
@@ -606,14 +610,14 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               {description && (
                 <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold">الوصف</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                  <h3 className="text-foreground text-sm font-semibold text-right">الوصف</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{description}</p>
                 </div>
               )}
 
               <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm">{payment}</div>
+                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
+                <div className="text-muted-foreground text-sm text-right">{payment}</div>
               </div>
 
               <div className="bg-muted/30 rounded-lg p-3 text-xs">
@@ -671,6 +675,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
         >
           <div
+            dir="rtl"
             className={cn(
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
@@ -708,7 +713,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             </div>
 
             <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold">{name}</h2>
+              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
 
               <div className="bg-muted/50 rounded-lg p-4">
                 <Field label="نوع الكفارة" value={type} />
@@ -716,14 +721,14 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               {description && (
                 <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold">الوصف</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                  <h3 className="text-foreground text-sm font-semibold text-right">الوصف</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{description}</p>
                 </div>
               )}
 
               <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm">{payment}</div>
+                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
+                <div className="text-muted-foreground text-sm text-right">{payment}</div>
               </div>
 
               <div className="bg-muted/30 rounded-lg p-3 text-xs">
@@ -774,6 +779,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
         className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
       >
         <div
+          dir="rtl"
           className={cn(
             'pointer-events-auto',
             'bg-background border-border rounded-xl border',
@@ -807,10 +813,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           </div>
 
           <div className="space-y-4 p-6">
-            <h2 className="text-foreground mb-2 text-2xl font-bold">{card.title}</h2>
+            <h2 className="text-foreground mb-2 text-2xl font-bold text-right">{card.title}</h2>
             <div className="border-border border-t pt-4">
-              <h3 className="text-foreground mb-2 text-sm font-semibold">الوصف</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{card.description}</p>
+              <h3 className="text-foreground mb-2 text-sm font-semibold text-right">الوصف</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed text-right">{card.description}</p>
             </div>
 
             <motion.button
