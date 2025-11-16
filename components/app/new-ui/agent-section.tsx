@@ -125,7 +125,7 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSecti
                 }}
                 className={cn(
                   'overflow-hidden bg-black drop-shadow-xl/80',
-                  isChatOpen ? 'h-[160px] w-[160px]' : 'h-[280px] w-[280px]'
+                  isChatOpen ? 'h-[160px] w-[160px]' : 'h-[600px] w-[600px]'
                 )}
               >
                 <VideoTrack
