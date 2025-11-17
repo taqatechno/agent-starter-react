@@ -238,6 +238,9 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                 <Field label="الفئة" value={category} />
                 <Field label="العمر" value={age} />
                 <Field label="الجنس" value={gender} />
+                {card.country?.name && (
+                  <Field label="الدولة" value={getArabicText(card.country.name)} />
+                )}
                 <Field label="الحالة" value={status} />
               </div>
 
@@ -361,6 +364,9 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <Field label="نوع المشروع" value={type} />
+                {card.country?.name && (
+                  <Field label="الدولة" value={getArabicText(card.country.name)} />
+                )}
                 <Field label="الحالة" value={status} />
                 {card.templateNumber && <Field label="رقم القالب" value={card.templateNumber} />}
                 {card.beneficiariesCount && <Field label="عدد المستفيدين" value={card.beneficiariesCount} />}

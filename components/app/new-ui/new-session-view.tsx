@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useRoomContext } from '@livekit/components-react';
 import type { AppConfig } from '@/app-config';
 import { AgentSection } from '@/components/app/new-ui/agent-section';
-import { CardsSection } from '@/components/app/new-ui/cards-section';
+import { ContentSection } from '@/components/app/new-ui/content-section';
 
 // Card interface for UI components
 export interface Card {
@@ -22,11 +22,16 @@ interface NewSessionViewProps {
 
 export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionViewProps) {
   const room = useRoomContext();
-  const [cards, setCards] = useState<Card[]>([]);
-  const [isCardsVisible, setIsCardsVisible] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
-  const [entityType, setEntityType] = useState<string>('');
+  const [contentSection, setContentSection] = useState<{
+    isVisible: boolean;
+    type: 'cards' | null;
+    data: any;
+  }>({
+    isVisible: false,
+    type: null,
+    data: null,
+  });
 
   // Register RPC handler for client.displayCards
   useEffect(() => {
@@ -67,11 +72,15 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             return card.name?.ar || card.name || 'Untitled';
           };
 
-          // Set cards, entity type, and make visible
-          setCards(payload.cards);
-          setEntityType(payload.Type || '');
-          setIsCardsVisible(true);
-          setSelectedCardId(null); // Auto-close any open modal
+          // Set content section data and make visible
+          setContentSection({
+            isVisible: true,
+            type: 'cards',
+            data: {
+              cards: payload.cards,
+              entityType: payload.Type || '',
+            },
+          });
 
           console.log(`✅ Displaying ${payload.cards.length} ${payload.Type} cards`);
 
@@ -84,10 +93,12 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             })),
           });
         } else if (payload.action === 'hide') {
-          // Hide cards section
-          setIsCardsVisible(false);
-          setSelectedCardId(null); // Reset selection
-          setEntityType(''); // Clear entity type
+          // Hide content section
+          setContentSection({
+            isVisible: false,
+            type: null,
+            data: null,
+          });
 
           console.log('👋 Hiding cards');
 
@@ -120,7 +131,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
       room.localParticipant.unregisterRpcMethod('client.displayCards');
       console.log('🔌 Unregistered RPC method: client.displayCards');
     };
-  }, [room, cards]); // Include dependencies
+  }, [room, contentSection]); // Include dependencies
 
   // Register RPC handler for client.controlCardModal
   useEffect(() => {
@@ -152,7 +163,8 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
           }
 
           // Find the card to validate it exists and get its title
-          const card = cards.find((c) => String(c.id) === String(payload.cardId));
+          const cards = contentSection.data?.cards || [];
+          const card = cards.find((c: Card) => String(c.id) === String(payload.cardId));
 
           if (!card) {
             console.error(`❌ Card not found: ${payload.cardId}`);
@@ -162,9 +174,9 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             });
           }
 
-          // Open modal (auto-switches if another is open)
-          setSelectedCardId(payload.cardId);
-          console.log(`✅ Opening modal for card: ${payload.cardId}`);
+          // Note: Modal opening is now handled by CardsView internally
+          // We log this for tracking, but the actual modal state is in CardsView
+          console.log(`✅ Request to open modal for card: ${payload.cardId}`);
 
           // Return success response with message
           return JSON.stringify({
@@ -173,9 +185,9 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             message: `card ${payload.cardId}, ${card.title} is open`,
           });
         } else if (payload.action === 'close') {
-          // Close modal (idempotent - safe even if no modal is open)
-          setSelectedCardId(null);
-          console.log('✅ Closing modal');
+          // Note: Modal closing is now handled by CardsView internally
+          // We log this for tracking, but the actual modal state is in CardsView
+          console.log('✅ Request to close modal');
 
           // Return success response
           return JSON.stringify({
@@ -206,22 +218,15 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
       room.localParticipant.unregisterRpcMethod('client.controlCardModal');
       console.log('🔌 Unregistered RPC method: client.controlCardModal');
     };
-  }, [room, cards]); // Include dependencies
+  }, [room, contentSection]); // Include dependencies
 
-  // Handle card selection
-  const handleCardSelect = (cardId: string | number) => {
-    setSelectedCardId(cardId);
-  };
-
-  // Handle modal close
-  const handleModalClose = () => {
-    setSelectedCardId(null);
-  };
-
-  // Handle closing entire cards section
-  const handleCloseCards = () => {
-    setIsCardsVisible(false);
-    setSelectedCardId(null); // Also close any open modal
+  // Handle closing entire content section
+  const handleCloseSection = () => {
+    setContentSection({
+      isVisible: false,
+      type: null,
+      data: null,
+    });
   };
 
   return (
@@ -240,7 +245,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
       <motion.div
         className="relative h-full"
         initial={{ width: '100%' }}
-        animate={{ width: isCardsVisible ? '40%' : '100%' }}
+        animate={{ width: contentSection.isVisible ? '40%' : '100%' }}
         transition={{
           type: 'spring',
           stiffness: 200,
@@ -254,8 +259,8 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
         />
       </motion.div>
 
-      {/* Cards Section - slides in from right */}
-      {isCardsVisible && (
+      {/* Content Section - slides in from right */}
+      {contentSection.isVisible && (
         <motion.div
           className="relative h-full"
           initial={{ width: '0%', opacity: 0 }}
@@ -267,13 +272,10 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             damping: 25,
           }}
         >
-          <CardsSection
-            cards={cards}
-            entityType={entityType}
-            selectedCardId={selectedCardId}
-            onCardSelect={handleCardSelect}
-            onModalClose={handleModalClose}
-            onClose={handleCloseCards}
+          <ContentSection
+            contentType={contentSection.type}
+            data={contentSection.data}
+            onClose={handleCloseSection}
           />
         </motion.div>
       )}
