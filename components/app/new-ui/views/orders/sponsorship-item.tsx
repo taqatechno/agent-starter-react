@@ -71,7 +71,7 @@ const translateStatus = (status: string): string => {
 
 // Helper: Get status badge styles
 const getStatusBadgeClass = (status: string): string => {
-  const baseClass = 'px-2 py-1 rounded-full text-xs font-medium';
+  const baseClass = 'px-2 py-0.5 rounded-full text-[11px] font-medium leading-tight';
   const statusClasses: Record<string, string> = {
     completed: `${baseClass} bg-blue-500/10 text-blue-600`,
     pending: `${baseClass} bg-yellow-500/10 text-yellow-600`,
@@ -115,7 +115,7 @@ export function SponsorshipItem({ sponsorship, onClick }: SponsorshipItemProps) 
       onClick={onClick}
       className={cn(
         'bg-card border-border hover:border-primary',
-        'rounded-lg border-2 p-4',
+        'rounded-lg border-2 p-3',
         'cursor-pointer',
         'shadow-md hover:shadow-xl',
         'transition-all duration-200'
@@ -123,21 +123,21 @@ export function SponsorshipItem({ sponsorship, onClick }: SponsorshipItemProps) 
       dir="rtl"
     >
       {/* Name + Status */}
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-start justify-between mb-1">
         <div>
-          <h4 className="text-foreground text-base font-semibold line-clamp-1">{name}</h4>
-          {subtitle && <p className="text-muted-foreground text-xs mt-1">{subtitle}</p>}
+          <h4 className="text-foreground text-sm font-semibold line-clamp-1 leading-tight">{name}</h4>
+          {subtitle && <p className="text-muted-foreground text-[11px] mt-0.5 leading-tight">{subtitle}</p>}
         </div>
         <span className={getStatusBadgeClass(sponsorship.status)}>{status}</span>
       </div>
 
       {/* Amount (always monthly for sponsorships) */}
-      <div className="text-primary text-sm font-medium mb-1">
+      <div className="text-primary text-xs font-medium mb-0.5 leading-tight">
         {sponsorship.amountQar} ر.ق - شهري
       </div>
 
       {/* Date */}
-      <div className="text-muted-foreground text-xs">
+      <div className="text-muted-foreground text-[11px] leading-tight">
         التاريخ: {date}
       </div>
     </motion.div>

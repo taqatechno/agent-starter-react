@@ -11,7 +11,7 @@ interface DonationOrder {
   id: string;
   amountQar: number;
   paymentSchedule: 'one_time' | 'monthly';
-  status: 'active' | 'cancelled' | 'completed';
+  status: 'completed' | 'pending' | 'processing' | 'failed' | 'refunded';
   notes?: string;
   createdAt: string;
   donation_item: any;
@@ -25,7 +25,7 @@ interface SponsorshipOrder {
   id: string;
   amountQar: number;
   paymentSchedule: 'monthly';
-  status: 'active' | 'cancelled' | 'completed';
+  status: 'completed' | 'pending' | 'processing' | 'failed' | 'refunded';
   createdAt: string;
   sponsorship_item: any;
   transaction: {
@@ -73,47 +73,55 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
   return (
     <div className="relative h-full w-full flex flex-col">
       {/* Title Section */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border p-4 z-20">
+      <div className="bg-background/95 backdrop-blur-sm border-b border-border p-4 z-20">
         <h2 className="text-xl font-bold text-foreground text-center">طلباتي</h2>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
-        {/* Donations Section */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 text-right text-foreground">التبرعات</h3>
-          {donations.length > 0 ? (
-            <div className="space-y-3">
-              {donations.map((donation) => (
-                <DonationItem
-                  key={donation.id}
-                  donation={donation}
-                  onClick={() => handleOrderClick(donation, 'donation')}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">لا توجد تبرعات</p>
-          )}
-        </section>
+      {/* Two Independent Scrollable Sections */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Donations Section - Fixed height, independently scrollable */}
+        <div className="flex-1 flex flex-col border-b border-border overflow-hidden">
+          <div className="bg-background/95 px-6 pt-4 pb-3">
+            <h3 className="text-lg font-semibold text-right text-foreground">التبرعات</h3>
+          </div>
+          <div className="flex-1 overflow-y-auto px-6 pb-4">
+            {donations.length > 0 ? (
+              <div className="space-y-2">
+                {donations.map((donation) => (
+                  <DonationItem
+                    key={donation.id}
+                    donation={donation}
+                    onClick={() => handleOrderClick(donation, 'donation')}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">لا توجد تبرعات</p>
+            )}
+          </div>
+        </div>
 
-        {/* Sponsorships Section */}
-        <section>
-          <h3 className="text-lg font-semibold mb-4 text-right text-foreground">الكفالات</h3>
-          {sponsorships.length > 0 ? (
-            <div className="space-y-3">
-              {sponsorships.map((sponsorship) => (
-                <SponsorshipItem
-                  key={sponsorship.id}
-                  sponsorship={sponsorship}
-                  onClick={() => handleOrderClick(sponsorship, 'sponsorship')}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">لا توجد كفالات</p>
-          )}
-        </section>
+        {/* Sponsorships Section - Fixed height, independently scrollable */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="bg-background/95 px-6 pt-4 pb-3">
+            <h3 className="text-lg font-semibold text-right text-foreground">الكفالات</h3>
+          </div>
+          <div className="flex-1 overflow-y-auto px-6 pb-4">
+            {sponsorships.length > 0 ? (
+              <div className="space-y-2">
+                {sponsorships.map((sponsorship) => (
+                  <SponsorshipItem
+                    key={sponsorship.id}
+                    sponsorship={sponsorship}
+                    onClick={() => handleOrderClick(sponsorship, 'sponsorship')}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">لا توجد كفالات</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Modal */}
