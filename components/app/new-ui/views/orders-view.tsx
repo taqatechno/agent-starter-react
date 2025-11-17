@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
+import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import { DonationItem } from '@/components/app/new-ui/views/orders/donation-item';
 import { SponsorshipItem } from '@/components/app/new-ui/views/orders/sponsorship-item';
 import { OrderModal } from '@/components/app/new-ui/views/orders/order-modal';
@@ -40,29 +41,134 @@ interface OrdersViewProps {
 }
 
 export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
+  const room = useRoomContext();
+  const { agent } = useVoiceAssistant();
   const [selectedOrder, setSelectedOrder] = useState<{
     type: 'donation' | 'sponsorship';
     data: DonationOrder | SponsorshipOrder;
   } | null>(null);
 
-  // Handle order click - show modal (and prepare for future RPC)
-  const handleOrderClick = (order: any, type: 'donation' | 'sponsorship') => {
+  // Register RPC handler for client.controlOrderModal
+  useEffect(() => {
+    const handleControlOrderModal = async (data: any): Promise<string> => {
+      try {
+        console.log('📨 Received controlOrderModal RPC:', data);
+
+        // Parse payload (handles both string and object)
+        const payload: { action: 'open' | 'close'; orderId?: string; orderType?: 'donation' | 'sponsorship' } =
+          typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+
+        // Validate action field
+        if (payload.action !== 'open' && payload.action !== 'close') {
+          console.error('❌ Invalid action:', payload.action);
+          return JSON.stringify({
+            status: 'error',
+            message: "Invalid action. Use 'open' or 'close'",
+          });
+        }
+
+        if (payload.action === 'open') {
+          // Validate orderId and orderType are provided
+          if (!payload.orderId || !payload.orderType) {
+            console.error('❌ Missing orderId or orderType for open action');
+            return JSON.stringify({
+              status: 'error',
+              message: "orderId and orderType are required for 'open' action",
+            });
+          }
+
+          // Find the order in the appropriate array
+          let order: DonationOrder | SponsorshipOrder | undefined;
+          if (payload.orderType === 'donation') {
+            order = donations.find((d) => d.id === payload.orderId);
+          } else if (payload.orderType === 'sponsorship') {
+            order = sponsorships.find((s) => s.id === payload.orderId);
+          }
+
+          if (!order) {
+            console.error(`❌ Order not found: ${payload.orderId} of type ${payload.orderType}`);
+            return JSON.stringify({
+              status: 'error',
+              message: `no order with id ${payload.orderId} of type ${payload.orderType}`,
+            });
+          }
+
+          // Open the modal
+          setSelectedOrder({ type: payload.orderType, data: order });
+          console.log(`✅ Opened modal for order: ${payload.orderId} of type ${payload.orderType}`);
+
+          // Return success response
+          return JSON.stringify({
+            status: 'success',
+            orderId: payload.orderId,
+            orderType: payload.orderType,
+            message: `order ${payload.orderId} of type ${payload.orderType} is open`,
+          });
+        } else if (payload.action === 'close') {
+          // Close the modal
+          setSelectedOrder(null);
+          console.log('✅ Closed order modal');
+
+          // Return success response
+          return JSON.stringify({
+            status: 'success',
+          });
+        }
+
+        // Should never reach here due to validation
+        return JSON.stringify({
+          status: 'error',
+          message: 'Unknown action',
+        });
+      } catch (error) {
+        console.error('❌ Error processing controlOrderModal:', error);
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    // Register the RPC method
+    room.localParticipant.registerRpcMethod('client.controlOrderModal', handleControlOrderModal);
+    console.log('🔌 Registered RPC method: client.controlOrderModal');
+
+    // Cleanup on unmount
+    return () => {
+      room.localParticipant.unregisterRpcMethod('client.controlOrderModal');
+      console.log('🔌 Unregistered RPC method: client.controlOrderModal');
+    };
+  }, [room, donations, sponsorships]); // Include dependencies
+
+  // Handle order click - show modal and send RPC to backend
+  const handleOrderClick = async (order: any, type: 'donation' | 'sponsorship') => {
     console.log(`🖱️ User clicked ${type} order:`, order.id);
 
     // Show modal immediately
     setSelectedOrder({ type, data: order });
 
-    // TODO: Future implementation - send RPC to backend
-    // if (!agent) return;
-    // await room.localParticipant.performRpc({
-    //   destinationIdentity: agent.identity,
-    //   method: 'agent.selectOrder',
-    //   payload: JSON.stringify({
-    //     orderId: order.id,
-    //     orderType: type,
-    //     action: 'select'
-    //   })
-    // });
+    // Send RPC to backend
+    if (!agent) {
+      console.warn('⚠️ No agent available to send selectOrder RPC');
+      return;
+    }
+
+    try {
+      console.log('📤 Sending agent.selectOrder RPC...');
+      const response = await room.localParticipant.performRpc({
+        destinationIdentity: agent.identity,
+        method: 'agent.selectOrder',
+        payload: JSON.stringify({
+          orderId: order.id,
+          orderType: type,
+          action: 'select',
+        }),
+      });
+
+      console.log('✅ agent.selectOrder RPC response:', response);
+    } catch (error) {
+      console.error('❌ Error sending agent.selectOrder RPC:', error);
+    }
   };
 
   // Handle modal close
