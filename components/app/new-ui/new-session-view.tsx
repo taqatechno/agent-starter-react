@@ -25,7 +25,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [contentSection, setContentSection] = useState<{
     isVisible: boolean;
-    type: 'cards' | null;
+    type: 'cards' | 'orders' | null;
     data: any;
   }>({
     isVisible: false,
@@ -68,8 +68,8 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
               // FAQ uses question.ar
               return card.question?.ar || card.question || 'Untitled FAQ';
             }
-            // All others use name.ar (sponsorship, project, charity, atonement)
-            return card.name?.ar || card.name || 'Untitled';
+            // All others use details.nameAr (sponsorship, project, charity, atonement)
+            return card.details?.nameAr || card.details?.nameEn || card.name?.ar || card.name || 'Untitled';
           };
 
           // Set content section data and make visible
@@ -217,6 +217,120 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
     return () => {
       room.localParticipant.unregisterRpcMethod('client.controlCardModal');
       console.log('🔌 Unregistered RPC method: client.controlCardModal');
+    };
+  }, [room, contentSection]); // Include dependencies
+
+  // Register RPC handler for client.displayOrders
+  useEffect(() => {
+    const handleDisplayOrders = async (data: any): Promise<string> => {
+      try {
+        console.log('📨 Received displayOrders RPC:', data);
+
+        // Parse payload
+        const payload: {
+          action: 'show' | 'hide';
+          donations: any[];
+          sponsorships: any[];
+        } = typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+
+        // Validate action field
+        if (payload.action !== 'show' && payload.action !== 'hide') {
+          console.error('❌ Invalid action:', payload.action);
+          return JSON.stringify({
+            status: 'error',
+            message: 'Invalid action. Use "show" or "hide"',
+          });
+        }
+
+        if (payload.action === 'show') {
+          // Validate arrays exist
+          if (!Array.isArray(payload.donations) || !Array.isArray(payload.sponsorships)) {
+            console.error('❌ Invalid orders payload');
+            return JSON.stringify({
+              status: 'error',
+              message: 'donations and sponsorships arrays are required',
+            });
+          }
+
+          // Set content section data
+          setContentSection({
+            isVisible: true,
+            type: 'orders',
+            data: {
+              donations: payload.donations,
+              sponsorships: payload.sponsorships,
+            },
+          });
+
+          console.log(
+            `✅ Displaying ${payload.donations.length} donations and ${payload.sponsorships.length} sponsorships`
+          );
+
+          // Helper: Extract title from donation item
+          const extractDonationTitle = (donation: any): string => {
+            const item = donation.donation_item;
+            if (!item) return 'غير محدد';
+            if (item.type === 'general') return 'تبرع عام';
+            // Extract from details.nameAr (for project, charity, atonement)
+            return item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+          };
+
+          // Helper: Extract title from sponsorship item
+          const extractSponsorshipTitle = (sponsorship: any): string => {
+            const item = sponsorship.sponsorship_item;
+            if (!item) return 'غير محدد';
+            // Extract from details.nameAr
+            return item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+          };
+
+          // Return success with extracted IDs and titles
+          return JSON.stringify({
+            status: 'success',
+            donations: payload.donations.map((donation) => ({
+              id: donation.id,
+              title: extractDonationTitle(donation),
+            })),
+            sponsorships: payload.sponsorships.map((sponsorship) => ({
+              id: sponsorship.id,
+              title: extractSponsorshipTitle(sponsorship),
+            })),
+          });
+        } else if (payload.action === 'hide') {
+          // Hide orders section
+          setContentSection({
+            isVisible: false,
+            type: null,
+            data: null,
+          });
+
+          console.log('👋 Hiding orders');
+
+          return JSON.stringify({
+            status: 'success',
+          });
+        }
+
+        return JSON.stringify({
+          status: 'error',
+          message: 'Unknown action',
+        });
+      } catch (error) {
+        console.error('❌ Error processing displayOrders:', error);
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    // Register the RPC method
+    room.localParticipant.registerRpcMethod('client.displayOrders', handleDisplayOrders);
+    console.log('🔌 Registered RPC method: client.displayOrders');
+
+    // Cleanup on unmount
+    return () => {
+      room.localParticipant.unregisterRpcMethod('client.displayOrders');
+      console.log('🔌 Unregistered RPC method: client.displayOrders');
     };
   }, [room, contentSection]); // Include dependencies
 

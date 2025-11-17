@@ -3,10 +3,11 @@
 import { motion } from 'motion/react';
 import { X } from '@phosphor-icons/react';
 import { CardsView } from '@/components/app/new-ui/views/cards-view';
+import { OrdersView } from '@/components/app/new-ui/views/orders-view';
 import { cn } from '@/lib/utils';
 
 interface ContentSectionProps {
-  contentType: 'cards' | null;
+  contentType: 'cards' | 'orders' | null;
   data: any;
   onClose: () => void;
 }
@@ -36,9 +37,9 @@ export function ContentSection({ contentType, data, onClose }: ContentSectionPro
 
       {/* Route to appropriate view - each view is self-contained */}
       {contentType === 'cards' && <CardsView {...data} />}
+      {contentType === 'orders' && <OrdersView {...data} />}
       {/* Future views can be added here:
           {contentType === 'login' && <LoginView {...data} />}
-          {contentType === 'orders' && <OrdersView {...data} />}
       */}
     </div>
   );
