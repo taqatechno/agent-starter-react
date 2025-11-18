@@ -568,22 +568,49 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         whileTap="tap"
         onClick={onClick}
         className={cn(
-          'h-[160px] w-[200px]',
-          'flex flex-col p-4',
-          'bg-card border-border hover:border-primary rounded-lg border-2',
+          'w-[200px]',
+          'flex flex-col overflow-hidden',
+          'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
           'shadow-md hover:shadow-xl',
           'transition-all duration-200'
         )}
       >
-        <div className="mb-2">
-          <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
-            {typeLabel}
-          </span>
+        {/* Horizontal layout: Image + Content */}
+        <div className="flex gap-2 p-3">
+          {/* Atonement Image - 80x80px */}
+          <div className="flex-shrink-0">
+            <img
+              src="https://placehold.co/80x80/e2e8f0/64748b?text=Atonement"
+              alt={name}
+              className="h-[80px] w-[80px] rounded-lg object-cover"
+            />
+          </div>
+
+          {/* Content */}
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            {/* Name */}
+            <h3 className="text-foreground line-clamp-2 text-right text-sm font-bold leading-tight">
+              {name}
+            </h3>
+
+            {/* Type Badge */}
+            <div className="flex justify-end">
+              <span className="bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 rounded-md px-2 py-0.5 text-xs font-medium">
+                {typeLabel}
+              </span>
+            </div>
+          </div>
         </div>
-        <h3 className="text-foreground mb-auto line-clamp-2 text-base font-semibold">{name}</h3>
+
+        {/* Amount Section */}
         {amount && (
-          <div className="text-primary text-sm font-semibold">{amount} ريال قطري</div>
+          <div className="border-t border-border bg-muted/30 px-3 py-2">
+            <div className="text-right">
+              <div className="text-muted-foreground text-xs">المبلغ المقترح</div>
+              <div className="text-foreground mt-0.5 text-sm font-bold" dir="rtl">{amount} ر.ق</div>
+            </div>
+          </div>
         )}
       </motion.div>
     );
