@@ -21,8 +21,8 @@ interface CardGridProps {
 }
 
 export function CardGrid({ cards, entityType, onCardClick }: CardGridProps) {
-  // Use CSS Grid for project cards, flex-wrap for others
-  const useGridLayout = entityType === 'project';
+  // Use CSS Grid for project and sponsorship cards, flex-wrap for others
+  const useGridLayout = entityType === 'project' || entityType === 'sponsorship';
 
   return (
     <motion.div

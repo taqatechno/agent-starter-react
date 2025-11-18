@@ -97,32 +97,155 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
     const categoryLabel = getCategoryLabel(category);
     const age = calculateAge(card.birthdate);
     const amount = card.payment?.requiredAmount || card.payment?.defaultAmount;
+    const gender = card.gender; // male, female
+
+    // Get country data - try multiple paths for compatibility
+    const country = card.details?.country || card.country;
+    const countryName = getArabicText(country?.name) || getArabicText(country) || 'غير محدد';
+
+    // Map Arabic country names to flag emojis (reuse same function as projects)
+    const getCountryFlag = (countryName: string): string => {
+      const flagMap: Record<string, string> = {
+        'كينيا': '🇰🇪',
+        'Kenya': '🇰🇪',
+        'السودان': '🇸🇩',
+        'Sudan': '🇸🇩',
+        'الصومال': '🇸🇴',
+        'Somalia': '🇸🇴',
+        'اليمن': '🇾🇪',
+        'Yemen': '🇾🇪',
+        'سوريا': '🇸🇾',
+        'Syria': '🇸🇾',
+        'فلسطين': '🇵🇸',
+        'Palestine': '🇵🇸',
+        'مصر': '🇪🇬',
+        'Egypt': '🇪🇬',
+        'الأردن': '🇯🇴',
+        'Jordan': '🇯🇴',
+        'لبنان': '🇱🇧',
+        'Lebanon': '🇱🇧',
+        'العراق': '🇮🇶',
+        'Iraq': '🇮🇶',
+        'المغرب': '🇲🇦',
+        'Morocco': '🇲🇦',
+        'الجزائر': '🇩🇿',
+        'Algeria': '🇩🇿',
+        'تونس': '🇹🇳',
+        'Tunisia': '🇹🇳',
+        'ليبيا': '🇱🇾',
+        'Libya': '🇱🇾',
+        'السعودية': '🇸🇦',
+        'Saudi Arabia': '🇸🇦',
+        'الإمارات': '🇦🇪',
+        'UAE': '🇦🇪',
+        'قطر': '🇶🇦',
+        'Qatar': '🇶🇦',
+        'الكويت': '🇰🇼',
+        'Kuwait': '🇰🇼',
+        'البحرين': '🇧🇭',
+        'Bahrain': '🇧🇭',
+        'عمان': '🇴🇲',
+        'Oman': '🇴🇲',
+      };
+      return flagMap[countryName] || '🌍';
+    };
+
+    // Get gender label
+    const getGenderLabel = (gender: string): string => {
+      return gender === 'female' ? 'أنثى' : 'ذكور';
+    };
 
     return (
       <motion.div
-        variants={cardVariants}
+        variants={{
+          ...cardVariants,
+          hover: {
+            scale: 1.02,
+            y: -2,
+            transition: {
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+            },
+          },
+        }}
         whileHover="hover"
         whileTap="tap"
-        onClick={onClick}
         className={cn(
-          'h-[160px] w-[200px]',
-          'flex flex-col p-4',
-          'bg-card border-border hover:border-primary rounded-lg border-2',
+          'w-full max-w-[320px]',
+          'flex flex-col overflow-hidden',
+          'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
           'shadow-md hover:shadow-xl',
           'transition-all duration-200'
         )}
       >
-        <div className="mb-2 flex items-center justify-between">
-          <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
-            {categoryLabel}
-          </span>
-          {age && <span className="text-muted-foreground text-xs">{age} سنة</span>}
+        {/* Card content wrapper - clickable area for modal */}
+        <div onClick={onClick} className="flex-1">
+          {/* Top section with avatar and info */}
+          <div className="flex gap-3 p-4">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              <img
+                src={`https://placehold.co/100x100/e2e8f0/64748b?text=Avatar`}
+                alt={name}
+                className="h-[100px] w-[100px] rounded-lg object-cover"
+              />
+            </div>
+
+            {/* Person Info */}
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              {/* Name */}
+              <h3 className="text-foreground line-clamp-2 text-right text-base font-bold leading-tight">
+                {name}
+              </h3>
+
+              {/* Age and Gender */}
+              {(age || gender) && (
+                <div className="text-muted-foreground text-right text-sm">
+                  {age && <span>{age} </span>}
+                  {gender && <span>{getGenderLabel(gender)}</span>}
+                </div>
+              )}
+
+              {/* Location with flag */}
+              <div className="flex flex-row-reverse items-center justify-end gap-1.5">
+                <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
+                <span className="text-muted-foreground text-sm">{countryName}</span>
+              </div>
+
+              {/* Category Badge */}
+              <div className="inline-flex self-end">
+                <span className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-3 py-1 text-xs font-medium">
+                  {categoryLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Amount Section */}
+          <div className="px-4 pb-3">
+            <div className="text-muted-foreground text-right text-xs">تبرع الكفالة الشهرية</div>
+            {amount && (
+              <div className="text-foreground mt-1 text-right text-lg font-bold">
+                {amount.toLocaleString()} ريال
+              </div>
+            )}
+          </div>
         </div>
-        <h3 className="text-foreground mb-auto line-clamp-2 text-base font-semibold">{name}</h3>
-        {amount && (
-          <div className="text-primary text-sm font-semibold">{amount} ريال/شهر</div>
-        )}
+
+        {/* Sponsor Button - separate from clickable area */}
+        <div className="border-t border-border p-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click when clicking button
+              onClick();
+            }}
+            className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
+          >
+            أكفلني
+          </button>
+        </div>
       </motion.div>
     );
   }
