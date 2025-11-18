@@ -3,9 +3,22 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
-import { DonationItem } from '@/components/app/new-ui/views/orders/donation-item';
-import { SponsorshipItem } from '@/components/app/new-ui/views/orders/sponsorship-item';
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from '@tanstack/react-table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { OrderModal } from '@/components/app/new-ui/views/orders/order-modal';
+import { cn } from '@/lib/utils';
 
 // Type definitions based on FRONTEND_TYPES_README.md
 interface DonationOrder {
@@ -40,6 +53,59 @@ interface OrdersViewProps {
   sponsorships: SponsorshipOrder[];
 }
 
+// Helper functions
+const getArabicText = (field: any): string => {
+  if (!field) return '';
+  if (typeof field === 'string') return field;
+  return field.ar || field.nameAr || field.en || field.nameEn || '';
+};
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ar-EG', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const translateStatus = (status: string): string => {
+  const translations: Record<string, string> = {
+    completed: 'مكتمل',
+    pending: 'قيد الانتظار',
+    processing: 'قيد المعالجة',
+    failed: 'فشل',
+    refunded: 'مسترد',
+  };
+  return translations[status] || status;
+};
+
+const translateCategory = (category: string): string => {
+  const translations: Record<string, string> = {
+    orphan: 'يتيم',
+    student: 'طالب',
+    teacher: 'معلم',
+    special_needs: 'ذوي احتياجات خاصة',
+    family: 'عائلة',
+  };
+  return translations[category] || category;
+};
+
+const translatePaymentSchedule = (schedule: string): string => {
+  return schedule === 'monthly' ? 'شهري' : 'مرة واحدة';
+};
+
+const getStatusColor = (status: string): string => {
+  const colors: Record<string, string> = {
+    completed: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+    pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300',
+    processing: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
+    failed: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+    refunded: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
+  };
+  return colors[status] || 'bg-gray-100 text-gray-700';
+};
+
 export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
   const room = useRoomContext();
   const { agent } = useVoiceAssistant();
@@ -47,11 +113,131 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
     type: 'donation' | 'sponsorship';
     data: DonationOrder | SponsorshipOrder;
   } | null>(null);
+  const [activeTab, setActiveTab] = useState<'sponsorships' | 'donations'>('sponsorships');
 
-  // Close modal when orders data changes (triggered by display RPC)
+  // Close modal when orders data changes
   useEffect(() => {
     setSelectedOrder(null);
   }, [donations, sponsorships]);
+
+  // Column definitions for Sponsorships Table
+  const sponsorshipColumns: ColumnDef<SponsorshipOrder>[] = [
+    {
+      accessorKey: 'name',
+      header: 'الاسم',
+      cell: ({ row }) => {
+        const name = getArabicText(row.original.sponsorship_item?.details?.name || row.original.sponsorship_item?.details);
+        return <div className="text-right font-medium">{name || 'غير محدد'}</div>;
+      },
+    },
+    {
+      accessorKey: 'category',
+      header: 'الفئة',
+      cell: ({ row }) => {
+        const category = row.original.sponsorship_item?.details?.category || '';
+        const categoryLabel = translateCategory(category);
+        return (
+          <div className="text-right">
+            <span className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-2 py-1 text-xs font-medium">
+              {categoryLabel}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'amountQar',
+      header: 'المبلغ',
+      cell: ({ row }) => (
+        <div className="text-right font-semibold">{row.original.amountQar} ر.ق</div>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: 'الحالة',
+      cell: ({ row }) => {
+        const status = row.original.status;
+        const statusLabel = translateStatus(status);
+        const statusColor = getStatusColor(status);
+        return (
+          <div className="text-right">
+            <span className={cn('rounded-md px-2 py-1 text-xs font-medium', statusColor)}>
+              {statusLabel}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      header: 'التاريخ',
+      cell: ({ row }) => (
+        <div className="text-right text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</div>
+      ),
+    },
+  ];
+
+  // Column definitions for Donations Table
+  const donationColumns: ColumnDef<DonationOrder>[] = [
+    {
+      accessorKey: 'name',
+      header: 'اسم العنصر',
+      cell: ({ row }) => {
+        const name = getArabicText(row.original.donation_item?.details?.name || row.original.donation_item?.details);
+        return <div className="text-right font-medium">{name || 'تبرع عام'}</div>;
+      },
+    },
+    {
+      accessorKey: 'amount',
+      header: 'المبلغ',
+      cell: ({ row }) => {
+        const amount = row.original.amountQar;
+        const schedule = translatePaymentSchedule(row.original.paymentSchedule);
+        return (
+          <div className="text-right">
+            <div className="font-semibold">{amount} ر.ق</div>
+            <div className="text-xs text-muted-foreground">{schedule}</div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'status',
+      header: 'الحالة',
+      cell: ({ row }) => {
+        const status = row.original.status;
+        const statusLabel = translateStatus(status);
+        const statusColor = getStatusColor(status);
+        return (
+          <div className="text-right">
+            <span className={cn('rounded-md px-2 py-1 text-xs font-medium', statusColor)}>
+              {statusLabel}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'createdAt',
+      header: 'التاريخ',
+      cell: ({ row }) => (
+        <div className="text-right text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</div>
+      ),
+    },
+  ];
+
+  // Initialize tables with @tanstack/react-table
+  const sponsorshipTable = useReactTable({
+    data: sponsorships,
+    columns: sponsorshipColumns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const donationTable = useReactTable({
+    data: donations,
+    columns: donationColumns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   // Register RPC handler for client.controlOrderModal
   useEffect(() => {
@@ -59,11 +245,9 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       try {
         console.log('📨 Received controlOrderModal RPC:', data);
 
-        // Parse payload (handles both string and object)
         const payload: { action: 'open' | 'close'; orderId?: string; orderType?: 'donation' | 'sponsorship' } =
           typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
 
-        // Validate action field
         if (payload.action !== 'open' && payload.action !== 'close') {
           console.error('❌ Invalid action:', payload.action);
           return JSON.stringify({
@@ -73,7 +257,6 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
         }
 
         if (payload.action === 'open') {
-          // Validate orderId and orderType are provided
           if (!payload.orderId || !payload.orderType) {
             console.error('❌ Missing orderId or orderType for open action');
             return JSON.stringify({
@@ -82,7 +265,6 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
             });
           }
 
-          // Find the order in the appropriate array
           let order: DonationOrder | SponsorshipOrder | undefined;
           if (payload.orderType === 'donation') {
             order = donations.find((d) => d.id === payload.orderId);
@@ -98,11 +280,9 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
             });
           }
 
-          // Open the modal
           setSelectedOrder({ type: payload.orderType, data: order });
           console.log(`✅ Opened modal for order: ${payload.orderId} of type ${payload.orderType}`);
 
-          // Return success response
           return JSON.stringify({
             status: 'success',
             orderId: payload.orderId,
@@ -110,17 +290,14 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
             message: `order ${payload.orderId} of type ${payload.orderType} is open`,
           });
         } else if (payload.action === 'close') {
-          // Close the modal
           setSelectedOrder(null);
           console.log('✅ Closed order modal');
 
-          // Return success response
           return JSON.stringify({
             status: 'success',
           });
         }
 
-        // Should never reach here due to validation
         return JSON.stringify({
           status: 'error',
           message: 'Unknown action',
@@ -134,25 +311,21 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       }
     };
 
-    // Register the RPC method
     room.localParticipant.registerRpcMethod('client.controlOrderModal', handleControlOrderModal);
     console.log('🔌 Registered RPC method: client.controlOrderModal');
 
-    // Cleanup on unmount
     return () => {
       room.localParticipant.unregisterRpcMethod('client.controlOrderModal');
       console.log('🔌 Unregistered RPC method: client.controlOrderModal');
     };
-  }, [room, donations, sponsorships]); // Include dependencies
+  }, [room, donations, sponsorships]);
 
   // Handle order click - show modal and send RPC to backend
   const handleOrderClick = async (order: any, type: 'donation' | 'sponsorship') => {
     console.log(`🖱️ User clicked ${type} order:`, order.id);
 
-    // Show modal immediately
     setSelectedOrder({ type, data: order });
 
-    // Send RPC to backend
     if (!agent) {
       console.warn('⚠️ No agent available to send selectOrder RPC');
       return;
@@ -176,11 +349,6 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
     }
   };
 
-  // Handle modal close
-  const handleModalClose = () => {
-    setSelectedOrder(null);
-  };
-
   return (
     <div className="relative h-full w-full flex flex-col">
       {/* Title Section */}
@@ -188,48 +356,124 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
         <h2 className="text-xl font-bold text-foreground text-center">طلباتي</h2>
       </div>
 
-      {/* Two Independent Scrollable Sections */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Donations Section - Fixed height, independently scrollable */}
-        <div className="flex-1 flex flex-col border-b border-border overflow-hidden">
-          <div className="bg-background/95 px-6 pt-4 pb-3">
-            <h3 className="text-lg font-semibold text-right text-foreground">التبرعات</h3>
+      {/* Mobile Tabs */}
+      <div className="md:hidden border-b border-border">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('sponsorships')}
+            className={cn(
+              'flex-1 py-3 text-center font-semibold transition-colors',
+              activeTab === 'sponsorships'
+                ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            الكفالات ({sponsorships.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('donations')}
+            className={cn(
+              'flex-1 py-3 text-center font-semibold transition-colors',
+              activeTab === 'donations'
+                ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            التبرعات ({donations.length})
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop: Two-column layout | Mobile: Single table based on active tab */}
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+        {/* Sponsorships Table */}
+        <div className={cn(
+          'flex flex-col border-l border-border overflow-hidden',
+          activeTab === 'sponsorships' ? 'block' : 'hidden md:flex'
+        )}>
+          <div className="bg-background/95 px-6 pt-4 pb-3 hidden md:block">
+            <h3 className="text-lg font-semibold text-right text-foreground">الكفالات ({sponsorships.length})</h3>
           </div>
-          <div className="flex-1 overflow-y-auto px-6 pb-4">
-            {donations.length > 0 ? (
-              <div className="space-y-2">
-                {donations.map((donation) => (
-                  <DonationItem
-                    key={donation.id}
-                    donation={donation}
-                    onClick={() => handleOrderClick(donation, 'donation')}
-                  />
-                ))}
-              </div>
+          <div className="flex-1 overflow-auto p-4" dir="rtl">
+            {sponsorships.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  {sponsorshipTable.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {sponsorshipTable.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleOrderClick(row.original, 'sponsorship')}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-              <p className="text-muted-foreground text-center py-8">لا توجد تبرعات</p>
+              <p className="text-muted-foreground text-center py-8">لا توجد كفالات</p>
             )}
           </div>
         </div>
 
-        {/* Sponsorships Section - Fixed height, independently scrollable */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="bg-background/95 px-6 pt-4 pb-3">
-            <h3 className="text-lg font-semibold text-right text-foreground">الكفالات</h3>
+        {/* Donations Table */}
+        <div className={cn(
+          'flex flex-col overflow-hidden',
+          activeTab === 'donations' ? 'block' : 'hidden md:flex'
+        )}>
+          <div className="bg-background/95 px-6 pt-4 pb-3 hidden md:block">
+            <h3 className="text-lg font-semibold text-right text-foreground">التبرعات ({donations.length})</h3>
           </div>
-          <div className="flex-1 overflow-y-auto px-6 pb-4">
-            {sponsorships.length > 0 ? (
-              <div className="space-y-2">
-                {sponsorships.map((sponsorship) => (
-                  <SponsorshipItem
-                    key={sponsorship.id}
-                    sponsorship={sponsorship}
-                    onClick={() => handleOrderClick(sponsorship, 'sponsorship')}
-                  />
-                ))}
-              </div>
+          <div className="flex-1 overflow-auto p-4" dir="rtl">
+            {donations.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  {donationTable.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {donationTable.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleOrderClick(row.original, 'donation')}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-              <p className="text-muted-foreground text-center py-8">لا توجد كفالات</p>
+              <p className="text-muted-foreground text-center py-8">لا توجد تبرعات</p>
             )}
           </div>
         </div>
@@ -237,7 +481,7 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
 
       {/* Modal */}
       <AnimatePresence>
-        {selectedOrder && <OrderModal order={selectedOrder} onClose={handleModalClose} />}
+        {selectedOrder && <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />}
       </AnimatePresence>
     </div>
   );
