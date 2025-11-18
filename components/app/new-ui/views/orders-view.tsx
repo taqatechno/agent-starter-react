@@ -91,6 +91,36 @@ const translateCategory = (category: string): string => {
   return translations[category] || category;
 };
 
+const translateDonationType = (type: string): string => {
+  const translations: Record<string, string> = {
+    // Main types
+    project: 'مشروع',
+    charity: 'صدقة',
+    atonement: 'كفارة',
+    general: 'عام',
+
+    // Project sub-types
+    mosque: 'مسجد',
+    housing: 'إسكان',
+    water: 'ماء',
+
+    // Charity sub-types
+    sadaqah: 'صدقة',
+    feeding_poor: 'إطعام المساكين',
+    clothes_donation: 'تبرع بالملابس',
+    calamity_relief: 'إغاثة الكوارث',
+    remove_affliction: 'رفع البلاء',
+
+    // Atonement sub-types
+    debtors: 'الغارمين',
+    aqiqah: 'عقيقة',
+    vows: 'نذور',
+    purge_income: 'تطهير الدخل',
+    fasting_kafara: 'كفارة الصيام',
+  };
+  return translations[type] || type;
+};
+
 const translatePaymentSchedule = (schedule: string): string => {
   return schedule === 'monthly' ? 'شهري' : 'مرة واحدة';
 };
@@ -113,7 +143,6 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
     type: 'donation' | 'sponsorship';
     data: DonationOrder | SponsorshipOrder;
   } | null>(null);
-  const [activeTab, setActiveTab] = useState<'sponsorships' | 'donations'>('sponsorships');
 
   // Close modal when orders data changes
   useEffect(() => {
@@ -149,7 +178,10 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       accessorKey: 'amountQar',
       header: 'المبلغ',
       cell: ({ row }) => (
-        <div className="text-right font-semibold">{row.original.amountQar} ر.ق</div>
+        <div className="text-right">
+          <div className="font-semibold">{row.original.amountQar} ر.ق</div>
+          <div className="text-xs text-muted-foreground">شهري</div>
+        </div>
       ),
     },
     {
@@ -185,6 +217,21 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       cell: ({ row }) => {
         const name = getArabicText(row.original.donation_item?.details?.name || row.original.donation_item?.details);
         return <div className="text-right font-medium">{name || 'تبرع عام'}</div>;
+      },
+    },
+    {
+      accessorKey: 'type',
+      header: 'الفئة',
+      cell: ({ row }) => {
+        const type = row.original.donation_item?.type || '';
+        const typeLabel = translateDonationType(type);
+        return (
+          <div className="text-right">
+            <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-md px-2 py-1 text-xs font-medium">
+              {typeLabel}
+            </span>
+          </div>
+        );
       },
     },
     {
@@ -356,42 +403,11 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
         <h2 className="text-xl font-bold text-foreground text-center">طلباتي</h2>
       </div>
 
-      {/* Mobile Tabs */}
-      <div className="md:hidden border-b border-border">
-        <div className="flex">
-          <button
-            onClick={() => setActiveTab('sponsorships')}
-            className={cn(
-              'flex-1 py-3 text-center font-semibold transition-colors',
-              activeTab === 'sponsorships'
-                ? 'bg-primary/10 text-primary border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            الكفالات ({sponsorships.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('donations')}
-            className={cn(
-              'flex-1 py-3 text-center font-semibold transition-colors',
-              activeTab === 'donations'
-                ? 'bg-primary/10 text-primary border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            التبرعات ({donations.length})
-          </button>
-        </div>
-      </div>
-
-      {/* Desktop: Two-column layout | Mobile: Single table based on active tab */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+      {/* Vertically stacked tables */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Sponsorships Table */}
-        <div className={cn(
-          'flex flex-col border-l border-border overflow-hidden',
-          activeTab === 'sponsorships' ? 'block' : 'hidden md:flex'
-        )}>
-          <div className="bg-background/95 px-6 pt-4 pb-3 hidden md:block">
+        <div className="flex flex-col border-b border-border overflow-hidden h-1/2">
+          <div className="bg-background/95 px-6 pt-4 pb-3">
             <h3 className="text-lg font-semibold text-right text-foreground">الكفالات ({sponsorships.length})</h3>
           </div>
           <div className="flex-1 overflow-auto p-4" dir="rtl">
@@ -433,11 +449,8 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
         </div>
 
         {/* Donations Table */}
-        <div className={cn(
-          'flex flex-col overflow-hidden',
-          activeTab === 'donations' ? 'block' : 'hidden md:flex'
-        )}>
-          <div className="bg-background/95 px-6 pt-4 pb-3 hidden md:block">
+        <div className="flex flex-col overflow-hidden h-1/2">
+          <div className="bg-background/95 px-6 pt-4 pb-3">
             <h3 className="text-lg font-semibold text-right text-foreground">التبرعات ({donations.length})</h3>
           </div>
           <div className="flex-1 overflow-auto p-4" dir="rtl">
