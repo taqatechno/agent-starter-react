@@ -134,39 +134,170 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
     const typeLabel = getCategoryLabel(type);
     const funding = card.funding;
     const percentage = funding?.percentageRaised || 0;
+    const raised = funding?.raisedAmount || 0; // Fixed: was amountRaised
+    const target = funding?.targetAmount || 0;
+    const remaining = target - raised;
+
+    // Get country data - try multiple paths for compatibility
+    const country = card.details?.country || card.country;
+    const countryName = getArabicText(country?.name) || getArabicText(country) || 'غير محدد';
+
+    // Map Arabic country names to flag emojis
+    const getCountryFlag = (countryName: string): string => {
+      const flagMap: Record<string, string> = {
+        'كينيا': '🇰🇪',
+        'Kenya': '🇰🇪',
+        'السودان': '🇸🇩',
+        'Sudan': '🇸🇩',
+        'الصومال': '🇸🇴',
+        'Somalia': '🇸🇴',
+        'اليمن': '🇾🇪',
+        'Yemen': '🇾🇪',
+        'سوريا': '🇸🇾',
+        'Syria': '🇸🇾',
+        'فلسطين': '🇵🇸',
+        'Palestine': '🇵🇸',
+        'مصر': '🇪🇬',
+        'Egypt': '🇪🇬',
+        'الأردن': '🇯🇴',
+        'Jordan': '🇯🇴',
+        'لبنان': '🇱🇧',
+        'Lebanon': '🇱🇧',
+        'العراق': '🇮🇶',
+        'Iraq': '🇮🇶',
+        'المغرب': '🇲🇦',
+        'Morocco': '🇲🇦',
+        'الجزائر': '🇩🇿',
+        'Algeria': '🇩🇿',
+        'تونس': '🇹🇳',
+        'Tunisia': '🇹🇳',
+        'ليبيا': '🇱🇾',
+        'Libya': '🇱🇾',
+        'السعودية': '🇸🇦',
+        'Saudi Arabia': '🇸🇦',
+        'الإمارات': '🇦🇪',
+        'UAE': '🇦🇪',
+        'قطر': '🇶🇦',
+        'Qatar': '🇶🇦',
+        'الكويت': '🇰🇼',
+        'Kuwait': '🇰🇼',
+        'البحرين': '🇧🇭',
+        'Bahrain': '🇧🇭',
+        'عمان': '🇴🇲',
+        'Oman': '🇴🇲',
+      };
+      return flagMap[countryName] || '🌍';
+    };
 
     return (
       <motion.div
-        variants={cardVariants}
+        variants={{
+          ...cardVariants,
+          hover: {
+            scale: 1.02,
+            y: -2,
+            transition: {
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+            },
+          },
+        }}
         whileHover="hover"
         whileTap="tap"
-        onClick={onClick}
         className={cn(
-          'h-[160px] w-[200px]',
-          'flex flex-col p-4',
-          'bg-card border-border hover:border-primary rounded-lg border-2',
+          'w-full max-w-[320px]',
+          'flex flex-col overflow-hidden',
+          'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
           'shadow-md hover:shadow-xl',
           'transition-all duration-200'
         )}
       >
-        <div className="mb-2">
-          <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
-            {typeLabel}
-          </span>
+        {/* Card content wrapper - clickable area for modal */}
+        <div onClick={onClick} className="flex-1">
+          {/* Top section with image and info */}
+          <div className="flex gap-3 p-4">
+            {/* Project Image */}
+            <div className="flex-shrink-0">
+              <img
+                src={`https://placehold.co/100x100/e2e8f0/64748b?text=Project`}
+                alt={name}
+                className="h-[100px] w-[100px] rounded-lg object-cover"
+              />
+            </div>
+
+            {/* Project Info */}
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              {/* Title */}
+              <h3 className="text-foreground line-clamp-2 text-right text-base font-bold leading-tight">
+                {name}
+              </h3>
+
+              {/* Location with flag */}
+              <div className="flex flex-row-reverse items-center justify-end gap-1.5">
+                <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
+                <span className="text-muted-foreground text-sm">{countryName}</span>
+              </div>
+
+              {/* Status Badge */}
+              <div className="inline-flex self-end">
+                <span className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-3 py-1 text-xs font-medium">
+                  {typeLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Section */}
+          <div className="px-4 pb-3">
+            {/* Progress Bar */}
+            <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
+                className="h-full transition-all duration-300"
+                style={{
+                  width: `${Math.min(percentage, 100)}%`,
+                  background: 'linear-gradient(90deg, #fb923c 0%, #f43f5e 100%)',
+                }}
+              />
+            </div>
+
+            {/* Funding Stats */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground text-xs">{percentage.toFixed(0)}%</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-foreground font-semibold">
+                  {raised.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">من</span>
+                <span className="text-muted-foreground">{target.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Remaining Amount */}
+            <div className="text-muted-foreground mt-1 text-right text-xs">
+              {remaining > 0 && (
+                <>
+                  <span className="font-medium">{remaining.toLocaleString()}</span> متبقي
+                </>
+              )}
+            </div>
+          </div>
         </div>
-        <h3 className="text-foreground mb-auto line-clamp-2 text-base font-semibold">{name}</h3>
-        <div className="mt-2">
-          <div className="mb-1 flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">التمويل</span>
-            <span className="text-primary text-xs font-semibold">{percentage.toFixed(0)}%</span>
-          </div>
-          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-            <div
-              className="bg-primary h-full transition-all duration-300"
-              style={{ width: `${Math.min(percentage, 100)}%` }}
-            />
-          </div>
+
+        {/* Donate Button - separate from clickable area */}
+        <div className="border-t border-border p-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click when clicking button
+              onClick();
+            }}
+            className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
+          >
+            تبرع الآن
+          </button>
         </div>
       </motion.div>
     );

@@ -21,14 +21,23 @@ interface CardGridProps {
 }
 
 export function CardGrid({ cards, entityType, onCardClick }: CardGridProps) {
+  // Use CSS Grid for project cards, flex-wrap for others
+  const useGridLayout = entityType === 'project';
+
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex h-full w-full items-center justify-center"
+      className="flex h-full w-full items-center justify-center p-4"
     >
-      <div className="flex max-w-4xl flex-row flex-wrap items-center justify-center gap-4">
+      <div
+        className={
+          useGridLayout
+            ? "grid w-full max-w-7xl grid-cols-[repeat(auto-fit,minmax(300px,320px))] justify-center gap-4"
+            : "flex max-w-4xl flex-row flex-wrap items-center justify-center gap-4"
+        }
+      >
         {cards.map((card) => (
           <CardItem key={card.id} card={card} entityType={entityType} onClick={() => onCardClick(card.id)} />
         ))}
