@@ -305,9 +305,11 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                 {/* Country with Flag */}
                 {countryName && (
-                  <div className="flex items-center justify-end gap-2">
-                    <span className="text-muted-foreground text-sm">{countryName}</span>
-                    <span className="text-xl">{getCountryFlag(countryName)}</span>
+                  <div className="w-full text-right">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="text-xl">{getCountryFlag(countryName)}</span>
+                      <span className="text-muted-foreground text-sm">{countryName}</span>
+                    </span>
                   </div>
                 )}
 
@@ -517,9 +519,11 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                   {/* Location with Flag */}
                   {countryName && (
-                    <div className="flex items-center justify-end gap-2">
-                      <span className="text-muted-foreground text-sm">{countryName}</span>
-                      <span className="text-xl">{getCountryFlag(countryName)}</span>
+                    <div className="w-full text-right">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="text-xl">{getCountryFlag(countryName)}</span>
+                        <span className="text-muted-foreground text-sm">{countryName}</span>
+                      </span>
                     </div>
                   )}
                 </div>

@@ -209,9 +209,11 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
               )}
 
               {/* Location with flag */}
-              <div className="flex flex-row-reverse items-center justify-end gap-1.5">
-                <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
-                <span className="text-muted-foreground text-sm">{countryName}</span>
+              <div className="w-full text-right">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
+                  <span className="text-muted-foreground text-sm">{countryName}</span>
+                </span>
               </div>
 
               {/* Category Badge */}
@@ -358,9 +360,11 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
               </h3>
 
               {/* Location with flag */}
-              <div className="flex flex-row-reverse items-center justify-end gap-1.5">
-                <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
-                <span className="text-muted-foreground text-sm">{countryName}</span>
+              <div className="w-full text-right">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-lg leading-none">{getCountryFlag(countryName)}</span>
+                  <span className="text-muted-foreground text-sm">{countryName}</span>
+                </span>
               </div>
 
               {/* Status Badge */}
