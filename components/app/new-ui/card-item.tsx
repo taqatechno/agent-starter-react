@@ -429,29 +429,61 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
   // FAQ card layout
   if (entityType === 'faq') {
     const question = getArabicText(card.question);
+    const answer = getArabicText(card.answer);
     const category = getArabicText(card.category);
 
     return (
       <motion.div
-        variants={cardVariants}
+        variants={{
+          ...cardVariants,
+          hover: {
+            scale: 1.01,
+            y: -2,
+            transition: {
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+            },
+          },
+        }}
         whileHover="hover"
-        whileTap="tap"
-        onClick={onClick}
         className={cn(
-          'h-[160px] w-[200px]',
-          'flex flex-col p-4',
-          'bg-card border-border hover:border-primary rounded-lg border-2',
-          'cursor-pointer',
+          'w-full max-w-[700px]',
+          'flex flex-col',
+          'bg-card border-border hover:border-primary rounded-xl border',
           'shadow-md hover:shadow-xl',
           'transition-all duration-200'
         )}
       >
-        <div className="mb-2">
-          <span className="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
+        {/* Header with category badge */}
+        <div className="flex items-start justify-between border-b border-border p-6 pb-4">
+          <div className="flex-1" />
+          <span className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-3 py-1.5 text-sm font-medium">
             {category}
           </span>
         </div>
-        <p className="text-foreground line-clamp-4 text-sm leading-relaxed">{question}</p>
+
+        {/* Question section */}
+        <div className="border-b border-border p-6">
+          <div className="mb-2 flex items-center justify-end gap-2">
+            <span className="text-muted-foreground text-sm font-medium">السؤال</span>
+            <span className="text-primary text-xl">❓</span>
+          </div>
+          <p className="text-foreground text-right text-xl font-bold leading-relaxed">
+            {question}
+          </p>
+        </div>
+
+        {/* Answer section */}
+        <div className="p-6">
+          <div className="mb-2 flex items-center justify-end gap-2">
+            <span className="text-muted-foreground text-sm font-medium">الإجابة</span>
+            <span className="text-primary text-xl">💡</span>
+          </div>
+          <p className="text-foreground text-right text-base leading-relaxed">
+            {answer}
+          </p>
+        </div>
       </motion.div>
     );
   }
