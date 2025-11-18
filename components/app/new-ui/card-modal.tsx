@@ -170,10 +170,51 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     const age = calculateAge(card.birthdate);
     const gender = translateGender(card.gender);
     const additionalInfo = getArabicText(card.additionalInfo);
-    const status = translateStatus(card.status);
-    const payment = formatPayment(card.payment);
-    const createdAt = formatDate(card.createdAt);
-    const updatedAt = formatDate(card.updatedAt);
+    const amount = card.payment?.requiredAmount || card.payment?.defaultAmount || 0;
+
+    // Get country data
+    const country = card.details?.country || card.country;
+    const countryName = getArabicText(country?.name) || getArabicText(country) || '';
+
+    // Map country names to flag emojis
+    const getCountryFlag = (countryName: string): string => {
+      const flagMap: Record<string, string> = {
+        'كينيا': '🇰🇪', 'Kenya': '🇰🇪',
+        'السودان': '🇸🇩', 'Sudan': '🇸🇩',
+        'الصومال': '🇸🇴', 'Somalia': '🇸🇴',
+        'اليمن': '🇾🇪', 'Yemen': '🇾🇪',
+        'سوريا': '🇸🇾', 'Syria': '🇸🇾',
+        'فلسطين': '🇵🇸', 'Palestine': '🇵🇸',
+        'مصر': '🇪🇬', 'Egypt': '🇪🇬',
+        'الأردن': '🇯🇴', 'Jordan': '🇯🇴',
+        'لبنان': '🇱🇧', 'Lebanon': '🇱🇧',
+        'العراق': '🇮🇶', 'Iraq': '🇮🇶',
+        'المغرب': '🇲🇦', 'Morocco': '🇲🇦',
+        'الجزائر': '🇩🇿', 'Algeria': '🇩🇿',
+        'تونس': '🇹🇳', 'Tunisia': '🇹🇳',
+      };
+      return flagMap[countryName] || '🌍';
+    };
+
+    // Generate sponsorship code
+    const sponsorshipCode = card.id ? `PFL-${String(card.id).slice(0, 8)}` : '';
+
+    // Get age category
+    const getAgeCategory = (age: number | null): string => {
+      if (!age) return 'غير محدد';
+      if (age < 6) return 'قبل المدرسة';
+      if (age < 12) return 'المرحلة الابتدائية';
+      if (age < 15) return 'المرحلة المتوسطة';
+      if (age < 18) return 'المرحلة الثانوية';
+      return 'بالغ';
+    };
+
+    // Format birthdate
+    const formatBirthdate = (birthdate: string | null): string => {
+      if (!birthdate) return 'غير محدد';
+      const date = new Date(birthdate);
+      return date.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    };
 
     return (
       <>
@@ -191,7 +232,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
+          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-4 md:p-6"
         >
           <div
             dir="rtl"
@@ -199,88 +240,152 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
               'shadow-2xl',
-              'w-full max-w-md max-h-[90vh] overflow-y-auto',
+              'w-full max-w-lg max-h-[90vh] overflow-y-auto',
               'scrollbar-thin'
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 right-0 z-10 flex justify-end p-3">
-              <motion.button
-                type="button"
-                onClick={onClose}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={cn(
-                  'rounded-full p-2',
-                  'bg-background/90 backdrop-blur-sm',
-                  'border-border border',
-                  'text-muted-foreground hover:text-foreground',
-                  'transition-colors shadow-md'
-                )}
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" weight="bold" />
-              </motion.button>
+            {/* Header with Avatar and Share Button */}
+            <div className="bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 relative aspect-[16/9] w-full">
+              {/* Share Button (top-left) */}
+              <div className="absolute left-4 top-4">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-lg"
+                  aria-label="Share"
+                >
+                  <span className="text-lg">🔗</span>
+                </motion.button>
+              </div>
+
+              {/* Avatar/Illustration */}
+              <div className="flex h-full w-full items-center justify-center">
+                <img
+                  src="https://placehold.co/200x200/e2e8f0/64748b?text=Avatar"
+                  alt={name}
+                  className="h-32 w-32 rounded-full object-cover"
+                />
+              </div>
+
+              {/* Close Button (top-right) */}
+              <div className="absolute right-4 top-4">
+                <motion.button
+                  type="button"
+                  onClick={onClose}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-lg"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" weight="bold" />
+                </motion.button>
+              </div>
             </div>
 
-            {/* Placeholder Image */}
-            <div className="bg-gradient-to-br from-primary/20 to-primary/10 relative aspect-[4/3] w-full flex items-center justify-center">
+            <div className="space-y-5 p-5">
+              {/* Main Info Card with Gradient Background */}
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 space-y-4 rounded-xl border border-pink-200 dark:border-pink-800 p-5 shadow-md">
+                {/* Title */}
+                <h2 className="text-foreground text-right text-lg font-bold leading-tight">
+                  أكمل التبرع ودعم ذاتهم إلى الأفضل
+                </h2>
+
+                {/* Categories */}
+                <div className="text-muted-foreground text-right text-sm">
+                  الرعاية الاجتماعية / الكفالات الاجتماعية
+                </div>
+
+                {/* Sponsorship Code */}
+                {sponsorshipCode && (
+                  <div className="text-muted-foreground text-right text-xs">
+                    رمز: {sponsorshipCode}
+                  </div>
+                )}
+
+                {/* Country with Flag */}
+                {countryName && (
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-muted-foreground text-sm">{countryName}</span>
+                    <span className="text-xl">{getCountryFlag(countryName)}</span>
+                  </div>
+                )}
+
+                {/* Amount and Donate Button Row */}
+                <div className="flex items-center justify-between gap-4 border-t border-pink-200 dark:border-pink-800 pt-4">
+                  {/* Donate Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-700 hover:to-rose-800 rounded-lg px-6 py-3 text-sm font-bold text-white shadow-lg transition-all"
+                  >
+                    تبرع الآن
+                  </motion.button>
+
+                  {/* Amount Display */}
+                  <div className="text-right">
+                    <div className="text-muted-foreground text-xs">مبلغ الكفالة الشهرية</div>
+                    <div className="text-foreground text-xl font-bold">{amount} ر.ق</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Name Section */}
               <div className="text-center">
-                <div className="text-6xl mb-2">🤝</div>
-                <div className="text-primary text-sm font-semibold">كفالة</div>
-              </div>
-            </div>
-
-            <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
-
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <Field label="الفئة" value={category} />
-                <Field label="العمر" value={age} />
-                <Field label="الجنس" value={gender} />
-                {card.country?.name && (
-                  <Field label="الدولة" value={getArabicText(card.country.name)} />
-                )}
-                <Field label="الحالة" value={status} />
+                <h3 className="text-foreground text-2xl font-bold">{name}</h3>
               </div>
 
+              {/* Statistics Grid (4 columns) */}
+              <div className="grid grid-cols-4 gap-3">
+                {/* Age */}
+                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
+                  <div className="text-2xl">🔢</div>
+                  <div className="text-muted-foreground text-xs">العمر</div>
+                  <div className="text-foreground text-xs font-semibold">{age ? `${age} سنة` : 'غير محدد'}</div>
+                </div>
+
+                {/* Birth Date */}
+                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
+                  <div className="text-2xl">📅</div>
+                  <div className="text-muted-foreground text-xs">تاريخ ميلاده</div>
+                  <div className="text-foreground text-xs font-semibold">{formatBirthdate(card.birthdate)}</div>
+                </div>
+
+                {/* Gender */}
+                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
+                  <div className="text-2xl">{card.gender === 'female' ? '👧' : '👦'}</div>
+                  <div className="text-muted-foreground text-xs">جنس</div>
+                  <div className="text-foreground text-xs font-semibold">{gender}</div>
+                </div>
+
+                {/* Category */}
+                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
+                  <div className="text-2xl">📋</div>
+                  <div className="text-muted-foreground text-xs">الفئة</div>
+                  <div className="text-foreground text-xs font-semibold">{category}</div>
+                </div>
+              </div>
+
+              {/* Additional Information Section */}
               {additionalInfo && (
-                <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold text-right">معلومات إضافية</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{additionalInfo}</p>
+                <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+                  <h3 className="text-foreground text-right text-base font-bold">مزيد من المعلومات</h3>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-foreground text-right leading-relaxed">{additionalInfo}</p>
+                  </div>
                 </div>
               )}
 
-              <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm text-right">{payment}</div>
+              {/* How It Works Section */}
+              <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+                <h3 className="text-foreground text-right text-base font-bold">
+                  كيف تتم عملية الكفالة معنا ؟
+                </h3>
+                <p className="text-muted-foreground text-right text-sm leading-relaxed">
+                  نقوم بالتواصل المعوقة مالكهم عبر الباحثين الميدانيين لنا، للتحقق من احتياجهم ومنحهم الكفالة الفعلية.
+                  سنوفر لك تقارير دورية عن الحالة والمستفيدين من كفالتك، مع إمكانية التواصل المباشر معهم في بعض الحالات.
+                </p>
               </div>
-
-              <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">تاريخ الإنشاء:</span>
-                  <span className="text-foreground">{createdAt}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">آخر تحديث:</span>
-                  <span className="text-foreground">{updatedAt}</span>
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'w-full rounded-lg px-4 py-3',
-                  'bg-primary text-primary-foreground',
-                  'text-sm font-semibold',
-                  'flex items-center justify-center gap-2',
-                  'hover:bg-primary/90 transition-colors shadow-md'
-                )}
-              >
-                <ShoppingCart className="h-5 w-5" weight="bold" />
-                تبرع الآن
-              </motion.button>
             </div>
           </div>
         </motion.div>
