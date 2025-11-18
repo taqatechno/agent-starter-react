@@ -294,7 +294,6 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     const description = getArabicText(card.description);
     const type = translateCategory(card.type);
     const status = translateStatus(card.status);
-    const payment = formatPayment(card.payment);
     const createdAt = formatDate(card.createdAt);
     const updatedAt = formatDate(card.updatedAt);
 
@@ -302,6 +301,34 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     const targetAmount = funding.targetAmount || 0;
     const raisedAmount = funding.raisedAmount || 0;
     const percentage = funding.percentageRaised || 0;
+    const remaining = targetAmount - raisedAmount;
+
+    // Get country data
+    const country = card.details?.country || card.country;
+    const countryName = getArabicText(country?.name) || getArabicText(country) || '';
+
+    // Map country names to flag emojis
+    const getCountryFlag = (countryName: string): string => {
+      const flagMap: Record<string, string> = {
+        'كينيا': '🇰🇪', 'Kenya': '🇰🇪',
+        'السودان': '🇸🇩', 'Sudan': '🇸🇩',
+        'الصومال': '🇸🇴', 'Somalia': '🇸🇴',
+        'اليمن': '🇾🇪', 'Yemen': '🇾🇪',
+        'سوريا': '🇸🇾', 'Syria': '🇸🇾',
+        'فلسطين': '🇵🇸', 'Palestine': '🇵🇸',
+        'مصر': '🇪🇬', 'Egypt': '🇪🇬',
+        'الأردن': '🇯🇴', 'Jordan': '🇯🇴',
+        'لبنان': '🇱🇧', 'Lebanon': '🇱🇧',
+        'العراق': '🇮🇶', 'Iraq': '🇮🇶',
+        'المغرب': '🇲🇦', 'Morocco': '🇲🇦',
+        'الجزائر': '🇩🇿', 'Algeria': '🇩🇿',
+        'تونس': '🇹🇳', 'Tunisia': '🇹🇳',
+      };
+      return flagMap[countryName] || '🌍';
+    };
+
+    // Generate project code (if card has id)
+    const projectCode = card.id ? `PR${String(card.id).slice(0, 8)}` : '';
 
     return (
       <>
@@ -319,7 +346,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
+          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-4 md:p-6"
         >
           <div
             dir="rtl"
@@ -327,12 +354,13 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               'pointer-events-auto',
               'bg-background border-border rounded-xl border',
               'shadow-2xl',
-              'w-full max-w-md max-h-[90vh] overflow-y-auto',
+              'w-full max-w-2xl max-h-[90vh] overflow-y-auto',
               'scrollbar-thin'
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 right-0 z-10 flex justify-end p-3">
+            {/* Close Button */}
+            <div className="sticky top-0 left-0 z-10 flex justify-start p-3">
               <motion.button
                 type="button"
                 onClick={onClose}
@@ -351,88 +379,136 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </motion.button>
             </div>
 
-            {/* Placeholder Image */}
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-500/10 relative aspect-[4/3] w-full flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-2">🏗️</div>
-                <div className="text-blue-600 text-sm font-semibold">مشروع</div>
+            {/* Hero Image with Status Badge */}
+            <div className="relative aspect-[21/9] w-full overflow-hidden">
+              <img
+                src={`https://placehold.co/1200x500/3b82f6/ffffff?text=Project+Image`}
+                alt={name}
+                className="h-full w-full object-cover"
+              />
+              {/* Status Badge on Image */}
+              <div className="absolute right-4 bottom-4">
+                <span className="bg-amber-50/95 text-amber-700 dark:bg-amber-950/95 dark:text-amber-300 rounded-lg px-4 py-2 text-sm font-semibold shadow-lg backdrop-blur-sm">
+                  {type}
+                </span>
               </div>
             </div>
 
-            <div className="space-y-4 p-6">
-              <h2 className="text-foreground text-2xl font-bold text-right">{name}</h2>
+            <div className="space-y-6 p-6">
+              {/* Title and Donate Button Row */}
+              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+                {/* Title and Info (right side) */}
+                <div className="flex-1 space-y-2">
+                  <h2 className="text-foreground text-right text-2xl font-bold leading-tight md:text-3xl">
+                    {name}
+                  </h2>
 
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <Field label="نوع المشروع" value={type} />
-                {card.country?.name && (
-                  <Field label="الدولة" value={getArabicText(card.country.name)} />
-                )}
-                <Field label="الحالة" value={status} />
-                {card.templateNumber && <Field label="رقم القالب" value={card.templateNumber} />}
-                {card.beneficiariesCount && <Field label="عدد المستفيدين" value={card.beneficiariesCount} />}
-                {card.implementationDurationDays && (
-                  <Field label="مدة التنفيذ" value={`${card.implementationDurationDays} يوم`} />
+                  {/* Project Code */}
+                  {projectCode && (
+                    <div className="text-muted-foreground text-right text-sm">
+                      رمز: {projectCode}
+                    </div>
+                  )}
+
+                  {/* Location with Flag */}
+                  {countryName && (
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="text-muted-foreground text-sm">{countryName}</span>
+                      <span className="text-xl">{getCountryFlag(countryName)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Donate Button (left on desktop) */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg px-6 py-3 text-base font-bold text-white transition-all duration-200 shadow-lg md:w-auto"
+                >
+                  تبرع الآن
+                </motion.button>
+              </div>
+
+              {/* Progress Section */}
+              <div className="bg-muted/30 rounded-lg p-5 space-y-3">
+                {/* Progress Bar */}
+                <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className="h-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(percentage, 100)}%`,
+                      background: 'linear-gradient(90deg, #fb923c 0%, #f43f5e 100%)',
+                    }}
+                  />
+                </div>
+
+                {/* Progress Stats */}
+                <div className="flex items-center justify-between">
+                  <span className="text-foreground text-sm font-semibold">{percentage.toFixed(0)}%</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-foreground font-bold">{raisedAmount.toLocaleString()}</span>
+                    <span className="text-muted-foreground">من</span>
+                    <span className="text-muted-foreground">{targetAmount.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Remaining Amount */}
+                {remaining > 0 && (
+                  <div className="text-muted-foreground text-right text-sm">
+                    <span className="font-semibold">{remaining.toLocaleString()}</span> ريال متبقي
+                  </div>
                 )}
               </div>
 
+              {/* Statistics Grid (3 columns) */}
+              <div className="grid grid-cols-3 gap-4">
+                {/* Beneficiaries */}
+                {card.beneficiariesCount && (
+                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
+                    <div className="text-primary text-2xl">👥</div>
+                    <div className="text-muted-foreground text-xs">عدد المستفيدين</div>
+                    <div className="text-foreground text-base font-bold">
+                      {card.beneficiariesCount} مستفيد
+                    </div>
+                  </div>
+                )}
+
+                {/* Implementation Duration */}
+                {card.implementationDurationDays && (
+                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
+                    <div className="text-primary text-2xl">⏱️</div>
+                    <div className="text-muted-foreground text-xs">مدة التنفيذ</div>
+                    <div className="text-foreground text-base font-bold">
+                      {Math.round(card.implementationDurationDays / 30)} شهر
+                    </div>
+                  </div>
+                )}
+
+                {/* Template Number */}
+                {card.templateNumber && (
+                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
+                    <div className="text-primary text-2xl">📋</div>
+                    <div className="text-muted-foreground text-xs">رقم محضر</div>
+                    <div className="text-foreground text-base font-bold">{card.templateNumber}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Description Section */}
               {description && (
-                <div className="space-y-2">
-                  <h3 className="text-foreground text-sm font-semibold text-right">الوصف</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed text-right">{description}</p>
+                <div className="border-border space-y-3 rounded-lg border bg-muted/20 p-5">
+                  <h3 className="text-foreground text-right text-lg font-bold">وصف المشروع</h3>
+                  <p className="text-foreground text-right text-sm leading-relaxed">{description}</p>
                 </div>
               )}
 
-              <div className="border-border border-t pt-4 space-y-3">
-                <h3 className="text-foreground text-sm font-semibold text-right">التمويل</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">المبلغ المستهدف:</span>
-                    <span className="text-foreground font-semibold">{targetAmount.toLocaleString()} ريال</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">المبلغ المجموع:</span>
-                    <span className="text-primary font-semibold">{raisedAmount.toLocaleString()} ريال</span>
-                  </div>
-                  <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
-                    <div
-                      className="bg-primary h-full transition-all duration-300"
-                      style={{ width: `${Math.min(percentage, 100)}%` }}
-                    />
-                  </div>
-                  <div className="text-center text-primary text-lg font-bold">{percentage.toFixed(1)}%</div>
-                </div>
-              </div>
-
+              {/* Metadata (minimized) */}
               <div className="border-border border-t pt-4">
-                <h3 className="text-foreground mb-3 text-sm font-semibold text-right">معلومات الدفع</h3>
-                <div className="text-muted-foreground text-sm text-right">{payment}</div>
-              </div>
-
-              <div className="bg-muted/30 rounded-lg p-3 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">تاريخ الإنشاء:</span>
-                  <span className="text-foreground">{createdAt}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">آخر تحديث:</span>
-                  <span className="text-foreground">{updatedAt}</span>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>تم التحديث: {updatedAt}</span>
+                  <span>تم الإنشاء: {createdAt}</span>
                 </div>
               </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'w-full rounded-lg px-4 py-3',
-                  'bg-primary text-primary-foreground',
-                  'text-sm font-semibold',
-                  'flex items-center justify-center gap-2',
-                  'hover:bg-primary/90 transition-colors shadow-md'
-                )}
-              >
-                <ShoppingCart className="h-5 w-5" weight="bold" />
-                تبرع الآن
-              </motion.button>
             </div>
           </div>
         </motion.div>
