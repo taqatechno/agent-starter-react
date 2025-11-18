@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import { CardGrid } from '@/components/app/new-ui/card-grid';
@@ -13,10 +13,114 @@ interface CardsViewProps {
   entityType: string;
 }
 
+// Helper function to extract title based on entity type
+const extractTitle = (card: any, type: string): string => {
+  if (type === 'faq') {
+    // FAQ uses question.ar
+    return card.question?.ar || card.question || 'Untitled FAQ';
+  }
+  // All others use details.nameAr (sponsorship, project, charity, atonement)
+  return card.details?.nameAr || card.details?.nameEn || card.name?.ar || card.name || 'Untitled';
+};
+
 export function CardsView({ cards, entityType }: CardsViewProps) {
   const room = useRoomContext();
   const { agent } = useVoiceAssistant();
   const [selectedCardId, setSelectedCardId] = useState<string | number | null>(null);
+
+  // Close modal when cards data changes (triggered by display RPC)
+  useEffect(() => {
+    setSelectedCardId(null);
+  }, [cards]);
+
+  // Register RPC handler for client.controlCardModal
+  useEffect(() => {
+    const handleControlCardModal = async (data: any): Promise<string> => {
+      try {
+        console.log('📨 Received controlCardModal RPC:', data);
+
+        // Parse payload (handles both string and object)
+        const payload: { action: 'open' | 'close'; cardId?: string | number } =
+          typeof data.payload === 'string' ? JSON.parse(data.payload) : data.payload;
+
+        // Validate action field
+        if (payload.action !== 'open' && payload.action !== 'close') {
+          console.error('❌ Invalid action:', payload.action);
+          return JSON.stringify({
+            status: 'error',
+            message: "Invalid action. Use 'open' or 'close'",
+          });
+        }
+
+        if (payload.action === 'open') {
+          // Validate cardId is provided
+          if (payload.cardId === undefined || payload.cardId === null) {
+            console.error('❌ Missing cardId for open action');
+            return JSON.stringify({
+              status: 'error',
+              message: "cardId is required for 'open' action",
+            });
+          }
+
+          // Find the card to validate it exists
+          const card = cards.find((c) => String(c.id) === String(payload.cardId));
+
+          if (!card) {
+            console.error(`❌ Card not found: ${payload.cardId}`);
+            return JSON.stringify({
+              status: 'error',
+              message: `no card with id ${payload.cardId}`,
+            });
+          }
+
+          // Open the modal
+          setSelectedCardId(payload.cardId);
+          console.log(`✅ Opened modal for card: ${payload.cardId}`);
+
+          // Extract title for response
+          const title = extractTitle(card, entityType);
+
+          // Return success response
+          return JSON.stringify({
+            status: 'success',
+            cardId: payload.cardId,
+            message: `card ${payload.cardId}, ${title} is open`,
+          });
+        } else if (payload.action === 'close') {
+          // Close the modal
+          setSelectedCardId(null);
+          console.log('✅ Closed card modal');
+
+          // Return success response
+          return JSON.stringify({
+            status: 'success',
+          });
+        }
+
+        // Should never reach here due to validation
+        return JSON.stringify({
+          status: 'error',
+          message: 'Unknown action',
+        });
+      } catch (error) {
+        console.error('❌ Error processing controlCardModal:', error);
+        return JSON.stringify({
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    };
+
+    // Register the RPC method
+    room.localParticipant.registerRpcMethod('client.controlCardModal', handleControlCardModal);
+    console.log('🔌 Registered RPC method: client.controlCardModal');
+
+    // Cleanup on unmount
+    return () => {
+      room.localParticipant.unregisterRpcMethod('client.controlCardModal');
+      console.log('🔌 Unregistered RPC method: client.controlCardModal');
+    };
+  }, [room, cards, entityType]); // Include dependencies
 
   // Handle card click - show modal and send RPC to backend
   const handleCardClick = async (cardId: string | number) => {
@@ -41,12 +145,15 @@ export function CardsView({ cards, entityType }: CardsViewProps) {
     }
 
     try {
+      // Extract title based on entity type
+      const title = extractTitle(card, entityType);
+
       const result = await room.localParticipant.performRpc({
         destinationIdentity: agent.identity,
         method: 'agent.selectCard',
         payload: JSON.stringify({
           cardId: cardId,
-          title: card.title,
+          title: title,
           action: 'select',
         }),
       });

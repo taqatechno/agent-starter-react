@@ -48,6 +48,11 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
     data: DonationOrder | SponsorshipOrder;
   } | null>(null);
 
+  // Close modal when orders data changes (triggered by display RPC)
+  useEffect(() => {
+    setSelectedOrder(null);
+  }, [donations, sponsorships]);
+
   // Register RPC handler for client.controlOrderModal
   useEffect(() => {
     const handleControlOrderModal = async (data: any): Promise<string> => {
