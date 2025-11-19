@@ -243,7 +243,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
               e.stopPropagation(); // Prevent card click when clicking button
               onClick();
             }}
-            className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
+            className="bg-[#9F0B56] hover:bg-[#8A0A4B] w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
           >
             أكفلني
           </button>
@@ -384,7 +384,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
                 className="h-full transition-all duration-300"
                 style={{
                   width: `${Math.min(percentage, 100)}%`,
-                  background: 'linear-gradient(90deg, #fb923c 0%, #f43f5e 100%)',
+                  background: '#9F0B56',
                 }}
               />
             </div>
@@ -421,7 +421,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
               e.stopPropagation(); // Prevent card click when clicking button
               onClick();
             }}
-            className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
+            className="bg-[#9F0B56] hover:bg-[#8A0A4B] w-full rounded-lg py-2.5 text-sm font-semibold text-white transition-all duration-200"
           >
             تبرع الآن
           </button>

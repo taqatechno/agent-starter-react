@@ -366,7 +366,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                     onClick={handleDonateClick}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-700 hover:to-rose-800 rounded-lg px-6 py-3 text-sm font-bold text-white shadow-lg transition-all"
+                    className="bg-[#9F0B56] hover:bg-[#8A0A4B] rounded-lg px-6 py-3 text-sm font-bold text-white shadow-lg transition-all"
                   >
                     اكفل الآن
                   </motion.button>
@@ -580,7 +580,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                   onClick={handleDonateClick}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg px-6 py-3 text-base font-bold text-white transition-all duration-200 shadow-lg md:w-auto"
+                  className="bg-[#9F0B56] hover:bg-[#8A0A4B] w-full rounded-lg px-6 py-3 text-base font-bold text-white transition-all duration-200 shadow-lg md:w-auto"
                 >
                   تبرع الآن
                 </motion.button>
@@ -594,7 +594,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                     className="h-full transition-all duration-300"
                     style={{
                       width: `${Math.min(percentage, 100)}%`,
-                      background: 'linear-gradient(90deg, #fb923c 0%, #f43f5e 100%)',
+                      background: '#9F0B56',
                     }}
                   />
                 </div>
