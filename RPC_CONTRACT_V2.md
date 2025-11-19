@@ -1082,6 +1082,74 @@ interface SponsorshipOrder {
 
 ---
 
+### agent.receiveExternalData
+
+**Purpose**: Notify agent that external server data was received via LiveKit data channel
+
+**Request Payload:**
+
+```json
+{
+  "message": "string",
+  "timestamp": "string (ISO 8601)",
+  "topic": "string"
+}
+```
+
+**Payload Fields:**
+- `message` (string, required): The message content from external server
+- `timestamp` (string, required): ISO 8601 timestamp when data was received
+- `topic` (string, optional): Topic/category of the data (default: "default")
+
+**Response:**
+- Success: `"success"`
+- Error: `"error: <message>"`
+
+**Example - External Data Received:**
+```json
+// Request
+{
+  "message": "New donation received: 500 QAR",
+  "timestamp": "2025-01-19T10:30:00.584Z",
+  "topic": "donations"
+}
+
+// Expected Response
+"success"
+```
+
+**Example - Default Topic:**
+```json
+// Request
+{
+  "message": "Hello frontend, this is a test!",
+  "timestamp": "2025-01-19T09:01:55.584Z",
+  "topic": "default"
+}
+
+// Expected Response
+"success"
+```
+
+**Example - Error:**
+```json
+// Request (missing message)
+{
+  "timestamp": "2025-01-19T10:30:00Z"
+}
+
+// Expected Response
+"error: missing message"
+```
+
+**Use Case:**
+- External servers can broadcast data to the LiveKit room using `RoomService.sendData()`
+- Frontend DataListener receives the data packet and forwards it to the agent via this RPC
+- Agent can process the external data and take appropriate actions
+- Typical topics: "donations", "orders", "notifications", "alerts"
+
+---
+
 ## TypeScript Type Definitions
 
 ### Core Types
