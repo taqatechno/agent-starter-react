@@ -99,9 +99,9 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
     const amount = card.payment?.requiredAmount || card.payment?.defaultAmount;
     const gender = card.gender; // male, female
 
-    // Get country data - try multiple paths for compatibility
-    const country = card.details?.country || card.country;
-    const countryName = getArabicText(country?.name) || getArabicText(country) || 'غير محدد';
+    // Get country data - V2 schema (no details wrapper)
+    const country = card.country;
+    const countryName = getArabicText(country?.name) || 'غير محدد';
 
     // Map Arabic country names to flag emojis (reuse same function as projects)
     const getCountryFlag = (countryName: string): string => {
@@ -263,9 +263,9 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
     const target = funding?.targetAmount || 0;
     const remaining = target - raised;
 
-    // Get country data - try multiple paths for compatibility
-    const country = card.details?.country || card.country;
-    const countryName = getArabicText(country?.name) || getArabicText(country) || 'غير محدد';
+    // Get country data - V2 schema (no details wrapper)
+    const country = card.country;
+    const countryName = getArabicText(country?.name) || 'غير محدد';
 
     // Map Arabic country names to flag emojis
     const getCountryFlag = (countryName: string): string => {

@@ -53,11 +53,11 @@ interface OrdersViewProps {
   sponsorships: SponsorshipOrder[];
 }
 
-// Helper functions
+// Helper functions - V2 schema
 const getArabicText = (field: any): string => {
   if (!field) return '';
   if (typeof field === 'string') return field;
-  return field.ar || field.nameAr || field.en || field.nameEn || '';
+  return field.ar || field.en || '';
 };
 
 const formatDate = (dateString: string): string => {
@@ -155,7 +155,7 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       accessorKey: 'name',
       header: 'الاسم',
       cell: ({ row }) => {
-        const name = getArabicText(row.original.sponsorship_item?.details?.name || row.original.sponsorship_item?.details);
+        const name = getArabicText(row.original.sponsorship_item?.details?.name);
         return <div className="text-right font-medium">{name || 'غير محدد'}</div>;
       },
     },
@@ -215,7 +215,7 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
       accessorKey: 'name',
       header: 'اسم العنصر',
       cell: ({ row }) => {
-        const name = getArabicText(row.original.donation_item?.details?.name || row.original.donation_item?.details);
+        const name = getArabicText(row.original.donation_item?.details?.name);
         return <div className="text-right font-medium">{name || 'تبرع عام'}</div>;
       },
     },

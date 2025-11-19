@@ -156,14 +156,14 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
       if (item.type === 'general') {
         entityName = 'تبرع عام';
       } else {
-        // Access from details wrapper
-        entityName = item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+        // V2 schema - details wrapper with nested BilingualText
+        entityName = getArabicText(item.details?.name) || 'غير محدد';
 
         // Add type-specific fields
         if (item.type === 'project') {
           entityFields.push(<Field key="project-type" label="نوع المشروع" value={translateCategory(item.type)} />);
-          if (item.details?.country?.nameAr || item.details?.country?.nameEn) {
-            entityFields.push(<Field key="country" label="الدولة" value={item.details.country.nameAr || item.details.country.nameEn} />);
+          if (item.details?.country?.name) {
+            entityFields.push(<Field key="country" label="الدولة" value={getArabicText(item.details.country.name)} />);
           }
         } else if (item.type === 'charity' || item.type === 'atonement') {
           entityFields.push(<Field key="item-type" label="النوع" value={translateCategory(item.type)} />);
@@ -174,15 +174,15 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
     // Sponsorship
     const item = data.sponsorship_item;
     if (item) {
-      // Access from details wrapper
-      entityName = item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+      // V2 schema - details wrapper with nested BilingualText
+      entityName = getArabicText(item.details?.name) || 'غير محدد';
       entityFields = [
         <Field key="category" label="الفئة" value={translateCategory(item.details?.category || '')} />,
         <Field key="age" label="العمر" value={calculateAge(item.details?.birthdate || null)} />,
         <Field key="gender" label="الجنس" value={translateGender(item.details?.gender || null)} />,
       ];
-      if (item.details?.country?.nameAr || item.details?.country?.nameEn) {
-        entityFields.push(<Field key="country" label="الدولة" value={item.details.country.nameAr || item.details.country.nameEn} />);
+      if (item.details?.country?.name) {
+        entityFields.push(<Field key="country" label="الدولة" value={getArabicText(item.details.country.name)} />);
       }
     }
   }

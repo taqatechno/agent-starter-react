@@ -13,14 +13,14 @@ interface CardsViewProps {
   entityType: string;
 }
 
-// Helper function to extract title based on entity type
+// Helper function to extract title based on entity type - V2 schema
 const extractTitle = (card: any, type: string): string => {
   if (type === 'faq') {
     // FAQ uses question.ar
     return card.question?.ar || card.question || 'Untitled FAQ';
   }
-  // All others use details.nameAr (sponsorship, project, charity, atonement)
-  return card.details?.nameAr || card.details?.nameEn || card.name?.ar || card.name || 'Untitled';
+  // V2 schema - all others use name.ar directly (sponsorship, project, charity, atonement)
+  return card.name?.ar || card.name?.en || 'Untitled';
 };
 
 export function CardsView({ cards, entityType }: CardsViewProps) {

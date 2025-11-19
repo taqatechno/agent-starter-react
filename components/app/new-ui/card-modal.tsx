@@ -172,9 +172,9 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     const additionalInfo = getArabicText(card.additionalInfo);
     const amount = card.payment?.requiredAmount || card.payment?.defaultAmount || 0;
 
-    // Get country data
-    const country = card.details?.country || card.country;
-    const countryName = getArabicText(country?.name) || getArabicText(country) || '';
+    // Get country data - V2 schema
+    const country = card.country;
+    const countryName = getArabicText(country?.name) || '';
 
     // Map country names to flag emojis
     const getCountryFlag = (countryName: string): string => {
@@ -410,9 +410,9 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     const percentage = funding.percentageRaised || 0;
     const remaining = targetAmount - raisedAmount;
 
-    // Get country data
-    const country = card.details?.country || card.country;
-    const countryName = getArabicText(country?.name) || getArabicText(country) || '';
+    // Get country data - V2 schema
+    const country = card.country;
+    const countryName = getArabicText(country?.name) || '';
 
     // Map country names to flag emojis
     const getCountryFlag = (countryName: string): string => {
@@ -608,6 +608,59 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                 <div className="border-border space-y-3 rounded-lg border bg-muted/20 p-5">
                   <h3 className="text-foreground text-right text-lg font-bold">وصف المشروع</h3>
                   <p className="text-foreground text-right text-sm leading-relaxed">{description}</p>
+                </div>
+              )}
+
+              {/* Project-Specific Details Section */}
+              {card.details && (
+                <div className="border-border space-y-3 rounded-lg border bg-muted/20 p-5">
+                  <h3 className="text-foreground text-right text-lg font-bold">التفاصيل الفنية</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Mosque Details */}
+                    {card.type === 'mosque' && (
+                      <>
+                        {card.details.capacity && (
+                          <Field label="سعة المصلين" value={`${card.details.capacity} مصلي`} />
+                        )}
+                        {card.details.areaSqm && (
+                          <Field label="المساحة" value={`${card.details.areaSqm} متر مربع`} />
+                        )}
+                        {card.details.hasMinaret !== undefined && (
+                          <Field label="المئذنة" value={card.details.hasMinaret ? 'نعم' : 'لا'} />
+                        )}
+                        {card.details.hasDome !== undefined && (
+                          <Field label="القبة" value={card.details.hasDome ? 'نعم' : 'لا'} />
+                        )}
+                      </>
+                    )}
+
+                    {/* Water Details */}
+                    {card.type === 'water' && (
+                      <>
+                        {card.details.depthMeters && (
+                          <Field label="العمق" value={`${card.details.depthMeters} متر`} />
+                        )}
+                        {card.details.capacityLitersPerHour && (
+                          <Field label="الإنتاجية" value={`${card.details.capacityLitersPerHour} لتر/ساعة`} />
+                        )}
+                      </>
+                    )}
+
+                    {/* Housing Details */}
+                    {card.type === 'housing' && (
+                      <>
+                        {card.details.numUnits && (
+                          <Field label="عدد الوحدات" value={`${card.details.numUnits} وحدة`} />
+                        )}
+                        {card.details.roomsPerUnit && (
+                          <Field label="عدد الغرف لكل وحدة" value={`${card.details.roomsPerUnit} غرفة`} />
+                        )}
+                        {card.details.areaSqm && (
+                          <Field label="مساحة الوحدة" value={`${card.details.areaSqm} متر مربع`} />
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 

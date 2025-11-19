@@ -98,8 +98,8 @@ const formatDate = (isoDate: string): string => {
 
 export function SponsorshipItem({ sponsorship, onClick }: SponsorshipItemProps) {
   const item = sponsorship.sponsorship_item;
-  // Access from details wrapper
-  const name = item?.details?.nameAr || item?.details?.nameEn || 'غير محدد';
+  // V2 schema - details wrapper with nested BilingualText
+  const name = getArabicText(item?.details?.name) || 'غير محدد';
   const category = item?.details?.category ? translateCategory(item.details.category) : null;
   const age = item?.details?.birthdate ? calculateAge(item.details.birthdate) : null;
   const status = translateStatus(sponsorship.status);

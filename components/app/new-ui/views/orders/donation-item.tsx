@@ -29,12 +29,12 @@ const getArabicText = (field: any): string => {
   return field.ar || field.en || '';
 };
 
-// Helper: Get donation item name
+// Helper: Get donation item name - V2 schema
 const getDonationItemName = (item: any): string => {
   if (!item) return 'غير محدد';
   if (item.type === 'general') return 'تبرع عام';
-  // Access from details wrapper
-  return item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+  // V2 schema - details wrapper with nested BilingualText
+  return getArabicText(item.details?.name) || 'غير محدد';
 };
 
 // Helper: Translate payment schedule

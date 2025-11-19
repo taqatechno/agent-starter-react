@@ -62,14 +62,14 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             });
           }
 
-          // Helper function to extract title based on entity type
+          // Helper function to extract title based on entity type - V2 schema
           const extractTitle = (card: any, type: string): string => {
             if (type === 'faq') {
               // FAQ uses question.ar
               return card.question?.ar || card.question || 'Untitled FAQ';
             }
-            // All others use details.nameAr (sponsorship, project, charity, atonement)
-            return card.details?.nameAr || card.details?.nameEn || card.name?.ar || card.name || 'Untitled';
+            // V2 schema - all others use name.ar directly (sponsorship, project, charity, atonement)
+            return card.name?.ar || card.name?.en || 'Untitled';
           };
 
           // Set content section data and make visible
@@ -179,21 +179,21 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             `✅ Displaying ${payload.donations.length} donations and ${payload.sponsorships.length} sponsorships`
           );
 
-          // Helper: Extract title from donation item
+          // Helper: Extract title from donation item - V2 schema
           const extractDonationTitle = (donation: any): string => {
             const item = donation.donation_item;
             if (!item) return 'غير محدد';
             if (item.type === 'general') return 'تبرع عام';
-            // Extract from details.nameAr (for project, charity, atonement)
-            return item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+            // V2 schema - details wrapper with nested BilingualText (for project, charity, atonement)
+            return item.details?.name?.ar || item.details?.name?.en || 'غير محدد';
           };
 
-          // Helper: Extract title from sponsorship item
+          // Helper: Extract title from sponsorship item - V2 schema
           const extractSponsorshipTitle = (sponsorship: any): string => {
             const item = sponsorship.sponsorship_item;
             if (!item) return 'غير محدد';
-            // Extract from details.nameAr
-            return item.details?.nameAr || item.details?.nameEn || 'غير محدد';
+            // V2 schema - details wrapper with nested BilingualText
+            return item.details?.name?.ar || item.details?.name?.en || 'غير محدد';
           };
 
           // Return success with extracted IDs and titles
