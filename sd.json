@@ -1,0 +1,245 @@
+{
+  "action": "show",
+  "donations": [
+    {
+      "id": "90c9400d-3236-4628-a52a-faf2109dfcfa",
+      "amountQar": "500.00",
+      "paymentSchedule": "one_time",
+      "donation_item": {
+        "type": "charity",
+        "details": {
+          "id": "31f2ec59-c7de-41e4-af49-4acfb8b7e622",
+          "type": "sadaqah",
+          "name": {
+            "ar": "صدقة عامة",
+            "en": "General Sadaqah"
+          },
+          "description": {
+            "ar": "صدقة جارية لوجه الله تعالى",
+            "en": "Ongoing charity for the sake of Allah"
+          },
+          "payment": {
+            "amountType": "flexible",
+            "scheduleType": "flexible",
+            "requiredAmount": null,
+            "defaultAmount": 100
+          },
+          "createdAt": "2025-11-16T11:41:58.252Z"
+        }
+      },
+      "status": "processing",
+      "notes": null,
+      "createdAt": "2025-11-18T12:12:29.206Z",
+      "transaction": {
+        "id": "bec37c2d-2528-4476-a9ea-903e9b64abb4",
+        "status": "processing"
+      }
+    },
+    {
+      "id": "6d08bc50-a66f-4731-b003-d7bf4d9602d0",
+      "amountQar": "200.00",
+      "paymentSchedule": "one_time",
+      "donation_item": {
+        "type": "general",
+        "details": null
+      },
+      "status": "processing",
+      "notes": null,
+      "createdAt": "2025-11-18T11:50:08.215Z",
+      "transaction": {
+        "id": "5d3c049a-cf22-4568-a983-16ee1a743a5e",
+        "status": "processing"
+      }
+    },
+    {
+      "id": "180fc644-e1fe-4e8f-88b3-584271802fc2",
+      "amountQar": "23000.00",
+      "paymentSchedule": "one_time",
+      "donation_item": {
+        "type": "project",
+        "details": {
+          "id": "0aa36fee-f2db-4862-b69a-bc5938c2cacc",
+          "type": "mosque",
+          "name": {
+            "ar": "جامع الرحمة الكبير",
+            "en": "Al-Rahma Grand Mosque"
+          },
+          "description": {
+            "ar": "مسجد متوسط بسعة 120 مصلي مع مئذنة",
+            "en": "Medium-sized mosque with capacity for 120 worshippers and minaret"
+          },
+          "country": {
+            "id": "6d9c284e-6fe2-4a33-9065-347a7cf0094a",
+            "name": {
+              "ar": "السودان",
+              "en": "Sudan"
+            },
+            "isoCode": "SD"
+          },
+          "funding": {
+            "targetAmount": 68000,
+            "raisedAmount": 45000,
+            "percentageRaised": 66
+          },
+          "payment": {
+            "amountType": "flexible",
+            "scheduleType": "flexible",
+            "requiredAmount": null,
+            "defaultAmount": 100
+          },
+          "beneficiariesCount": 120,
+          "implementationDurationDays": 240,
+          "templateNumber": "MSQ-002",
+          "status": "active",
+          "details": null,
+          "createdAt": "2025-11-16T11:41:58.228Z",
+          "updatedAt": "2025-11-16T11:41:58.228Z"
+        }
+      },
+      "status": "completed",
+      "notes": null,
+      "createdAt": "2025-11-17T08:47:31.913Z",
+      "transaction": {
+        "id": "790b9325-3aa8-4fc2-b1b8-e2c3cffd8a55",
+        "status": "completed"
+      }
+    }
+  ],
+  "sponsorships": [
+    {
+      "id": "4026522b-e719-4827-978c-6bf12a425552",
+      "amountQar": "250.00",
+      "paymentSchedule": "monthly",
+      "sponsorship_item": {
+        "type": "sponsorship",
+        "details": {
+          "id": "961bfeef-ad20-48d8-8756-9d3020fdcdcc",
+          "category": "special_needs",
+          "name": {
+            "ar": "مريم سعيد",
+            "en": "Mariam Saeed"
+          },
+          "birthdate": "2013-02-28",
+          "gender": "female",
+          "country": {
+            "id": "474c3cf8-0f63-41eb-a6ee-258ba0a75ee6",
+            "name": {
+              "ar": "فلسطين",
+              "en": "Palestine"
+            },
+            "isoCode": "PS"
+          },
+          "payment": {
+            "amountType": "fixed",
+            "scheduleType": "monthly",
+            "requiredAmount": 250,
+            "defaultAmount": null
+          },
+          "additionalInfo": {
+            "ar": "من ذوي الاحتياجات الخاصة",
+            "en": "Person with special needs"
+          },
+          "status": "available",
+          "createdAt": "2025-11-16T11:41:58.248Z",
+          "updatedAt": "2025-11-16T11:41:58.248Z"
+        }
+      },
+      "status": "processing",
+      "createdAt": "2025-11-18T06:15:48.955Z",
+      "transaction": {
+        "id": "75ae4779-f97f-4e5a-861f-c777ef200aec",
+        "status": "processing"
+      }
+    },
+    {
+      "id": "e7554051-d407-4478-ac54-497e3add515f",
+      "amountQar": "180.00",
+      "paymentSchedule": "monthly",
+      "sponsorship_item": {
+        "type": "sponsorship",
+        "details": {
+          "id": "81cbd7f4-dfb1-4887-861c-3b44c85a9c7f",
+          "category": "student",
+          "name": {
+            "ar": "عائشة إبراهيم",
+            "en": "Aisha Ibrahim"
+          },
+          "birthdate": "2010-05-10",
+          "gender": "female",
+          "country": {
+            "id": "8b8af37d-8156-466c-8ee0-69453bd02cdc",
+            "name": {
+              "ar": "بنغلاديش",
+              "en": "Bangladesh"
+            },
+            "isoCode": "BD"
+          },
+          "payment": {
+            "amountType": "fixed",
+            "scheduleType": "monthly",
+            "requiredAmount": 180,
+            "defaultAmount": null
+          },
+          "additionalInfo": {
+            "ar": "طالبة متفوقة",
+            "en": "Excellent student"
+          },
+          "status": "available",
+          "createdAt": "2025-11-16T11:41:58.248Z",
+          "updatedAt": "2025-11-16T11:41:58.248Z"
+        }
+      },
+      "status": "completed",
+      "createdAt": "2025-11-17T08:53:49.890Z",
+      "transaction": {
+        "id": "1b755209-3edc-4b8d-b8cf-f6bc8c10583f",
+        "status": "completed"
+      }
+    },
+    {
+      "id": "39ad977b-b8de-44f6-b319-48f0382f6d29",
+      "amountQar": "250.00",
+      "paymentSchedule": "monthly",
+      "sponsorship_item": {
+        "type": "sponsorship",
+        "details": {
+          "id": "961bfeef-ad20-48d8-8756-9d3020fdcdcc",
+          "category": "special_needs",
+          "name": {
+            "ar": "مريم سعيد",
+            "en": "Mariam Saeed"
+          },
+          "birthdate": "2013-02-28",
+          "gender": "female",
+          "country": {
+            "id": "474c3cf8-0f63-41eb-a6ee-258ba0a75ee6",
+            "name": {
+              "ar": "فلسطين",
+              "en": "Palestine"
+            },
+            "isoCode": "PS"
+          },
+          "payment": {
+            "amountType": "fixed",
+            "scheduleType": "monthly",
+            "requiredAmount": 250,
+            "defaultAmount": null
+          },
+          "additionalInfo": {
+            "ar": "من ذوي الاحتياجات الخاصة",
+            "en": "Person with special needs"
+          },
+          "status": "available",
+          "createdAt": "2025-11-16T11:41:58.248Z",
+          "updatedAt": "2025-11-16T11:41:58.248Z"
+        }
+      },
+      "status": "processing",
+      "createdAt": "2025-11-17T08:53:18.796Z",
+      "transaction": {
+        "id": "6941131e-10fc-4a8f-86dc-a5e8df9f9e75",
+        "status": "processing"
+      }
+    }
+  ]
+}
