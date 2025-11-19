@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, X } from '@phosphor-icons/react';
+import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import type { Card } from '@/components/app/new-ui/new-session-view';
 import { cn } from '@/lib/utils';
 
@@ -151,6 +152,10 @@ const Field = ({ label, value }: { label: string; value: string | number | null 
 );
 
 export function CardModal({ card, entityType, onClose }: CardModalProps) {
+  // Get room and agent context
+  const room = useRoomContext();
+  const { agent } = useVoiceAssistant();
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -162,6 +167,47 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
+
+  // Handle donate button click
+  const handleDonateClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    console.log(`💳 User clicked donate on ${entityType} card:`, card.id);
+
+    // Check agent availability
+    if (!agent) {
+      console.warn('⚠️ No agent available to process donation');
+      return;
+    }
+
+    // Extract card name (bilingual)
+    let cardName = '';
+    if (entityType === 'faq') {
+      cardName = getArabicText(card.question);
+    } else {
+      cardName = getArabicText(card.name);
+    }
+
+    // Build minimal payload - agent will ask for details
+    const payload = {
+      cardId: card.id,
+      cardName: cardName,
+    };
+
+    try {
+      console.log('📤 Sending agent.initiateDonation RPC...', payload);
+
+      const result = await room.localParticipant.performRpc({
+        destinationIdentity: agent.identity,
+        method: 'agent.initiateDonation',
+        payload: JSON.stringify(payload),
+      });
+
+      console.log('✅ Agent acknowledged donation intent:', result);
+    } catch (error) {
+      console.error('❌ Failed to initiate donation:', error);
+    }
+  };
 
   // Sponsorship Modal
   if (entityType === 'sponsorship') {
@@ -315,13 +361,14 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                 {/* Amount and Donate Button Row */}
                 <div className="flex items-center justify-between gap-4 border-t border-pink-200 dark:border-pink-800 pt-4">
-                  {/* Donate Button */}
+                  {/* Sponsor Button */}
                   <motion.button
+                    onClick={handleDonateClick}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="bg-gradient-to-r from-pink-600 to-rose-700 hover:from-pink-700 hover:to-rose-800 rounded-lg px-6 py-3 text-sm font-bold text-white shadow-lg transition-all"
                   >
-                    تبرع الآن
+                    اكفل الآن
                   </motion.button>
 
                   {/* Amount Display */}
@@ -530,6 +577,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                 {/* Donate Button (left on desktop) */}
                 <motion.button
+                  onClick={handleDonateClick}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 w-full rounded-lg px-6 py-3 text-base font-bold text-white transition-all duration-200 shadow-lg md:w-auto"
@@ -872,6 +920,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
 
               <motion.button
+                onClick={handleDonateClick}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
@@ -983,6 +1032,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
 
               <motion.button
+                onClick={handleDonateClick}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
@@ -1064,6 +1114,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             </div>
 
             <motion.button
+              onClick={handleDonateClick}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className={cn(

@@ -6,8 +6,9 @@ import { RoomEvent } from 'livekit-client';
 import { toastAlert } from '@/components/livekit/alert-toast';
 
 interface ServerDataPayload {
-  message: string;
+  type?: string;
   timestamp: string;
+  [key: string]: any; // Allow additional fields from external server
 }
 
 export function DataListener() {
@@ -50,14 +51,16 @@ export function DataListener() {
           // Parse JSON
           const data: ServerDataPayload = JSON.parse(jsonString);
 
-          console.log('✅ Parsed server data:', {
-            message: data.message,
-            timestamp: data.timestamp,
-            topic: topic || 'none'
-          });
+          console.log('✅ Parsed server data (full object):', data);
 
-          // Show a toast notification
-          if (data.message) {
+          // Show a toast notification based on data type
+          if (data.type === 'payment:success') {
+            toastAlert({
+              title: 'Payment Successful',
+              description: `Order ${data.orderId?.slice(0, 8)}... - Amount: ${data.amount} QAR`,
+            });
+          } else if (data.message) {
+            // Fallback for test messages
             toastAlert({
               title: 'Server Message',
               description: data.message,
@@ -67,16 +70,12 @@ export function DataListener() {
           // Send data to agent via RPC
           if (agent) {
             try {
-              console.log('📤 Sending external data to agent via RPC...');
+              console.log('📤 Sending external data to agent via RPC...', data);
 
               const response = await room.localParticipant.performRpc({
                 destinationIdentity: agent.identity,
                 method: 'agent.receiveExternalData',
-                payload: JSON.stringify({
-                  message: data.message,
-                  timestamp: data.timestamp,
-                  topic: topic || 'default',
-                }),
+                payload: JSON.stringify(data), // Send only data from external server
               });
 
               console.log('✅ Agent acknowledged external data:', response);
