@@ -51,6 +51,13 @@ const getArabicText = (field: any): string => {
   return field.ar || field.en || '';
 };
 
+// Helper function to get primary project image
+const getPrimaryProjectImage = (images?: any[]): string | null => {
+  if (!images || images.length === 0) return null;
+  const sorted = [...images].sort((a, b) => a.displayOrder - b.displayOrder);
+  return sorted[0]?.photoUrl || null;
+};
+
 const formatPayment = (payment: any): string => {
   if (!payment) return 'غير محدد';
 
@@ -536,7 +543,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
             {/* Hero Image with Status Badge */}
             <div className="relative aspect-[21/9] w-full overflow-hidden">
               <img
-                src={`https://placehold.co/1200x500/3b82f6/ffffff?text=Project+Image`}
+                src={getPrimaryProjectImage(card.images) || `https://placehold.co/1200x500/3b82f6/ffffff?text=Project+Image`}
                 alt={name}
                 className="h-full w-full object-cover"
               />

@@ -47,6 +47,13 @@ const getArabicText = (field: any): string => {
   return field.ar || field.en || '';
 };
 
+// Helper function to get primary project image
+const getPrimaryProjectImage = (images?: any[]): string | null => {
+  if (!images || images.length === 0) return null;
+  const sorted = [...images].sort((a, b) => a.displayOrder - b.displayOrder);
+  return sorted[0]?.photoUrl || null;
+};
+
 const calculateAge = (birthdate: string | null): number | null => {
   if (!birthdate) return null;
   const birth = new Date(birthdate);
@@ -346,7 +353,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
             {/* Project Image */}
             <div className="flex-shrink-0">
               <img
-                src={`https://placehold.co/100x100/e2e8f0/64748b?text=Project`}
+                src={getPrimaryProjectImage(card.images) || `https://placehold.co/100x100/e2e8f0/64748b?text=Project`}
                 alt={name}
                 className="h-[100px] w-[100px] rounded-lg object-cover"
               />
