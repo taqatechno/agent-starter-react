@@ -84,10 +84,7 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSecti
   return (
     <div className="bg-background relative flex h-full w-full flex-col">
       {/* Main content area - avatar and chat */}
-      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-3 md:px-4">
-        {/* Loading Indicator Overlay */}
-        <LoadingIndicator isLoading={isLoading} />
-
+      <div className="flex flex-1 flex-col items-center justify-center overflow-hidden px-3 md:px-4">
         {/* Avatar/Voice Visualizer - centered, scales down when chat opens */}
         <div className="mb-2 flex items-center justify-center md:mb-4">
           <AnimatePresence mode="popLayout">
@@ -109,10 +106,11 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSecti
                   delay: animationDelay,
                 }}
                 className={cn(
-                  'bg-background aspect-square h-[100px] rounded-2xl border border-transparent transition-[border,drop-shadow] md:h-[120px] lg:animate-[scale_1s_ease-in-out]',
+                  'relative bg-background aspect-square h-[100px] rounded-2xl border border-transparent transition-[border,drop-shadow] md:h-[120px] lg:animate-[scale_1s_ease-in-out]',
                   isChatOpen && 'border-input/50 drop-shadow-lg/10 delay-200'
                 )}
               >
+                <LoadingIndicator isLoading={isLoading} isChatOpen={isChatOpen} />
                 <BarVisualizer
                   barCount={5}
                   state={agentState}
@@ -161,13 +159,14 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSecti
                   },
                 }}
                 className={cn(
-                  'overflow-hidden bg-black drop-shadow-xl/80',
+                  'relative overflow-hidden bg-black drop-shadow-xl/80',
                   // Responsive avatar sizes
                   isChatOpen
                     ? 'h-[120px] w-[120px] sm:h-[140px] sm:w-[140px] md:h-[160px] md:w-[160px]'
                     : 'h-[280px] w-[280px] sm:h-[350px] sm:w-[350px] md:h-[450px] md:w-[450px] lg:h-[600px] lg:w-[600px]'
                 )}
               >
+                <LoadingIndicator isLoading={isLoading} isChatOpen={isChatOpen} />
                 <VideoTrack
                   width={videoWidth}
                   height={videoHeight}
