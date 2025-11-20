@@ -59,6 +59,16 @@ export function DataListener() {
               title: 'Payment Successful',
               description: `Order ${data.orderId?.slice(0, 8)}... - Amount: ${data.amount} QAR`,
             });
+          } else if (data.type === 'loading') {
+            // Dispatch loading status event (no toast, no RPC to agent)
+            console.log('🔄 Loading status received:', data.status);
+            window.dispatchEvent(
+              new CustomEvent('livekit-loading-status', {
+                detail: { status: data.status }
+              })
+            );
+            // Skip RPC for loading messages - return early
+            return;
           } else if (data.message) {
             // Fallback for test messages
             toastAlert({
@@ -67,7 +77,7 @@ export function DataListener() {
             });
           }
 
-          // Send data to agent via RPC
+          // Send data to agent via RPC (skip for loading type)
           if (agent) {
             try {
               console.log('📤 Sending external data to agent via RPC...', data);

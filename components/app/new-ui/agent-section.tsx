@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BarVisualizer, VideoTrack, useVoiceAssistant } from '@livekit/components-react';
 import type { AppConfig } from '@/app-config';
 import { ChatTranscript } from '@/components/app/chat-transcript';
 import { AgentControlBar } from '@/components/app/new-ui/agent-control-bar';
+import { LoadingIndicator } from '@/components/app/new-ui/loading-indicator';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { ScrollArea } from '@/components/livekit/scroll-area/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
@@ -23,9 +24,10 @@ interface AgentSectionProps {
   isChatOpen: boolean;
   onChatToggle: () => void;
   appConfig: AppConfig;
+  contentSectionIsVisible: boolean;
 }
 
-export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSectionProps) {
+export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSectionIsVisible }: AgentSectionProps) {
   const {
     state: agentState,
     audioTrack: agentAudioTrack,
@@ -40,6 +42,38 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSecti
 
   const animationDelay = isChatOpen ? 0 : 0.15;
 
+  // Loading state for search indicator
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Listen for loading status events from data-listener
+  useEffect(() => {
+    const handleLoadingStatus = (event: Event) => {
+      const customEvent = event as CustomEvent<{ status: boolean }>;
+      const { status } = customEvent.detail;
+
+      // Idempotent: only update if different
+      setIsLoading((prev) => (prev !== status ? status : prev));
+
+      console.log('🔄 Loading status updated:', status);
+    };
+
+    window.addEventListener('livekit-loading-status', handleLoadingStatus);
+    console.log('🔌 Registered loading status listener');
+
+    return () => {
+      window.removeEventListener('livekit-loading-status', handleLoadingStatus);
+      console.log('🔌 Unregistered loading status listener');
+    };
+  }, []);
+
+  // Auto-dismiss loading when content section opens (permanent dismissal)
+  useEffect(() => {
+    if (contentSectionIsVisible && isLoading) {
+      setIsLoading(false);
+      console.log('✅ Loading dismissed due to content section opening');
+    }
+  }, [contentSectionIsVisible, isLoading]);
+
   // Auto-scroll chat transcript to bottom
   useEffect(() => {
     if (scrollAreaRef.current && isChatOpen) {
@@ -50,7 +84,10 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSecti
   return (
     <div className="bg-background relative flex h-full w-full flex-col">
       {/* Main content area - avatar and chat */}
-      <div className="flex flex-1 flex-col items-center justify-center overflow-hidden px-3 md:px-4">
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-3 md:px-4">
+        {/* Loading Indicator Overlay */}
+        <LoadingIndicator isLoading={isLoading} />
+
         {/* Avatar/Voice Visualizer - centered, scales down when chat opens */}
         <div className="mb-2 flex items-center justify-center md:mb-4">
           <AnimatePresence mode="popLayout">

@@ -312,6 +312,7 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
           isChatOpen={isChatOpen}
           onChatToggle={() => setIsChatOpen(!isChatOpen)}
           appConfig={appConfig}
+          contentSectionIsVisible={contentSection.isVisible}
         />
       </motion.div>
 
