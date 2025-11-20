@@ -1,11 +1,28 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, X } from '@phosphor-icons/react';
 import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import type { Card } from '@/components/app/new-ui/new-session-view';
 import { cn } from '@/lib/utils';
+
+// Hook to detect mobile breakpoint
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return isMobile;
+}
 
 const backdropVariants = {
   hidden: { opacity: 0 },
@@ -162,6 +179,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
   // Get room and agent context
   const room = useRoomContext();
   const { agent } = useVoiceAssistant();
+  const isMobile = useIsMobile();
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -276,7 +294,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className={cn(
+            "inset-0 z-40 bg-black/40 backdrop-blur-sm",
+            isMobile ? "fixed" : "absolute"
+          )}
           onClick={onClose}
           aria-label="Close modal"
         />
@@ -285,21 +306,24 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          className={cn(
+            "pointer-events-none inset-0 z-50 flex items-center justify-center",
+            isMobile ? "fixed p-0" : "absolute p-2 sm:p-4 md:p-6"
+          )}
         >
           <div
             dir="rtl"
             className={cn(
               'pointer-events-auto',
-              'bg-background border-border rounded-xl border',
-              'shadow-2xl',
-              'w-full max-w-lg max-h-[90vh] overflow-y-auto',
-              'scrollbar-thin'
+              'bg-background border-border shadow-2xl scrollbar-thin',
+              isMobile
+                ? 'h-full w-full overflow-y-auto rounded-none'
+                : 'rounded-lg border sm:rounded-xl w-full max-w-full max-h-[95vh] overflow-y-auto sm:max-w-lg sm:max-h-[90vh]'
             )}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header with Avatar and Share Button */}
-            <div className="bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 relative aspect-[16/9] w-full">
+            <div className="bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-700 dark:to-slate-800 relative aspect-[21/9] w-full sm:aspect-[16/9]">
               {/* Share Button (top-left) */}
               <div className="absolute left-4 top-4">
                 <motion.button
@@ -336,9 +360,9 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
             </div>
 
-            <div className="space-y-5 p-5">
+            <div className="space-y-2 p-3 sm:space-y-3 sm:p-4 md:space-y-5 md:p-5">
               {/* Main Info Card with Gradient Background */}
-              <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 space-y-4 rounded-xl border border-pink-200 dark:border-pink-800 p-5 shadow-md">
+              <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 space-y-2 rounded-xl border border-pink-200 dark:border-pink-800 p-3 shadow-md sm:space-y-3 sm:p-4 md:space-y-4 md:p-5">
                 {/* Title */}
                 <h2 className="text-foreground text-right text-lg font-bold leading-tight">
                   أكمل التبرع ودعم ذاتهم إلى الأفضل
@@ -367,13 +391,13 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                 )}
 
                 {/* Amount and Donate Button Row */}
-                <div className="flex items-center justify-between gap-4 border-t border-pink-200 dark:border-pink-800 pt-4">
+                <div className="flex items-center justify-between gap-2 border-t border-pink-200 dark:border-pink-800 pt-2 sm:gap-3 sm:pt-3 md:gap-4 md:pt-4">
                   {/* Sponsor Button */}
                   <motion.button
                     onClick={handleDonateClick}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-[#9F0B56] hover:bg-[#8A0A4B] rounded-lg px-6 py-3 text-sm font-bold text-white shadow-lg transition-all"
+                    className="bg-[#9F0B56] hover:bg-[#8A0A4B] rounded-lg px-4 py-2 text-sm font-bold text-white shadow-lg transition-all sm:px-5 sm:py-2.5 md:px-6 md:py-3"
                   >
                     اكفل الآن
                   </motion.button>
@@ -381,42 +405,42 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                   {/* Amount Display */}
                   <div className="text-right">
                     <div className="text-muted-foreground text-xs">مبلغ الكفالة الشهرية</div>
-                    <div className="text-foreground text-xl font-bold">{amount} ر.ق</div>
+                    <div className="text-foreground text-lg font-bold sm:text-xl">{amount} ر.ق</div>
                   </div>
                 </div>
               </div>
 
               {/* Name Section */}
               <div className="text-center">
-                <h3 className="text-foreground text-2xl font-bold">{name}</h3>
+                <h3 className="text-foreground text-lg font-bold sm:text-xl md:text-2xl">{name}</h3>
               </div>
 
               {/* Statistics Grid (4 columns) */}
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4">
                 {/* Age */}
-                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
-                  <div className="text-2xl">🔢</div>
+                <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-2 text-center sm:gap-2 sm:p-3">
+                  <div className="text-xl sm:text-2xl">🔢</div>
                   <div className="text-muted-foreground text-xs">العمر</div>
                   <div className="text-foreground text-xs font-semibold">{age ? `${age} سنة` : 'غير محدد'}</div>
                 </div>
 
                 {/* Birth Date */}
-                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
-                  <div className="text-2xl">📅</div>
+                <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-2 text-center sm:gap-2 sm:p-3">
+                  <div className="text-xl sm:text-2xl">📅</div>
                   <div className="text-muted-foreground text-xs">تاريخ ميلاده</div>
                   <div className="text-foreground text-xs font-semibold">{formatBirthdate(card.birthdate)}</div>
                 </div>
 
                 {/* Gender */}
-                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
-                  <div className="text-2xl">{card.gender === 'female' ? '👧' : '👦'}</div>
+                <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-2 text-center sm:gap-2 sm:p-3">
+                  <div className="text-xl sm:text-2xl">{card.gender === 'female' ? '👧' : '👦'}</div>
                   <div className="text-muted-foreground text-xs">جنس</div>
                   <div className="text-foreground text-xs font-semibold">{gender}</div>
                 </div>
 
                 {/* Category */}
-                <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-3 text-center">
-                  <div className="text-2xl">📋</div>
+                <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-2 text-center sm:gap-2 sm:p-3">
+                  <div className="text-xl sm:text-2xl">📋</div>
                   <div className="text-muted-foreground text-xs">الفئة</div>
                   <div className="text-foreground text-xs font-semibold">{category}</div>
                 </div>
@@ -424,8 +448,8 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
               {/* Additional Information Section */}
               {additionalInfo && (
-                <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
-                  <h3 className="text-foreground text-right text-base font-bold">مزيد من المعلومات</h3>
+                <div className="space-y-2 rounded-lg border border-border bg-muted/20 p-3 sm:space-y-3 sm:p-4">
+                  <h3 className="text-foreground text-right text-sm font-bold sm:text-base">مزيد من المعلومات</h3>
                   <div className="space-y-2 text-sm">
                     <p className="text-foreground text-right leading-relaxed">{additionalInfo}</p>
                   </div>
@@ -433,8 +457,8 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               )}
 
               {/* How It Works Section */}
-              <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
-                <h3 className="text-foreground text-right text-base font-bold">
+              <div className="space-y-2 rounded-lg border border-border bg-muted/20 p-3 sm:space-y-3 sm:p-4">
+                <h3 className="text-foreground text-right text-sm font-bold sm:text-base">
                   كيف تتم عملية الكفالة معنا ؟
                 </h3>
                 <p className="text-muted-foreground text-right text-sm leading-relaxed">
@@ -498,7 +522,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className={cn(
+            "inset-0 z-40 bg-black/40 backdrop-blur-sm",
+            isMobile ? "fixed" : "absolute"
+          )}
           onClick={onClose}
           aria-label="Close modal"
         />
@@ -507,16 +534,19 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          className={cn(
+            "pointer-events-none inset-0 z-50 flex items-center justify-center",
+            isMobile ? "fixed p-0" : "absolute p-2 sm:p-4 md:p-6"
+          )}
         >
           <div
             dir="rtl"
             className={cn(
               'pointer-events-auto',
-              'bg-background border-border rounded-xl border',
-              'shadow-2xl',
-              'w-full max-w-2xl max-h-[90vh] overflow-y-auto',
-              'scrollbar-thin'
+              'bg-background border-border shadow-2xl scrollbar-thin',
+              isMobile
+                ? 'h-full w-full overflow-y-auto rounded-none'
+                : 'rounded-lg border sm:rounded-xl w-full max-w-full max-h-[95vh] overflow-y-auto sm:max-w-2xl sm:max-h-[90vh]'
             )}
             onClick={(e) => e.stopPropagation()}
           >
@@ -555,12 +585,12 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
             </div>
 
-            <div className="space-y-6 p-6">
+            <div className="space-y-3 p-3 sm:space-y-4 sm:p-4 md:space-y-6 md:p-6">
               {/* Title and Donate Button Row */}
-              <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col items-start gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
                 {/* Title and Info (right side) */}
-                <div className="flex-1 space-y-2">
-                  <h2 className="text-foreground text-right text-2xl font-bold leading-tight md:text-3xl">
+                <div className="flex-1 space-y-1 sm:space-y-2">
+                  <h2 className="text-foreground text-right text-lg font-bold leading-tight sm:text-xl md:text-2xl lg:text-3xl">
                     {name}
                   </h2>
 
@@ -575,7 +605,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                   {countryName && (
                     <div className="w-full text-right">
                       <span className="inline-flex items-center gap-2">
-                        <span className="text-xl">{getCountryFlag(countryName)}</span>
+                        <span className="text-lg sm:text-xl">{getCountryFlag(countryName)}</span>
                         <span className="text-muted-foreground text-sm">{countryName}</span>
                       </span>
                     </div>
@@ -587,14 +617,14 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
                   onClick={handleDonateClick}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-[#9F0B56] hover:bg-[#8A0A4B] w-full rounded-lg px-6 py-3 text-base font-bold text-white transition-all duration-200 shadow-lg md:w-auto"
+                  className="bg-[#9F0B56] hover:bg-[#8A0A4B] w-full rounded-lg px-4 py-2 text-base font-bold text-white transition-all duration-200 shadow-lg sm:px-5 sm:py-2.5 md:w-auto md:px-6 md:py-3"
                 >
                   تبرع الآن
                 </motion.button>
               </div>
 
               {/* Progress Section */}
-              <div className="bg-muted/30 rounded-lg p-5 space-y-3">
+              <div className="bg-muted/30 rounded-lg p-3 space-y-2 sm:p-4 sm:space-y-3 md:p-5">
                 {/* Progress Bar */}
                 <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
@@ -625,11 +655,11 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               </div>
 
               {/* Statistics Grid (3 columns) */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 {/* Beneficiaries */}
                 {card.beneficiariesCount && (
-                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
-                    <div className="text-primary text-2xl">👥</div>
+                  <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-3 text-center sm:gap-2 sm:p-4">
+                    <div className="text-primary text-xl sm:text-2xl">👥</div>
                     <div className="text-muted-foreground text-xs">عدد المستفيدين</div>
                     <div className="text-foreground text-base font-bold">
                       {card.beneficiariesCount} مستفيد
@@ -639,10 +669,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                 {/* Implementation Duration */}
                 {card.implementationDurationDays && (
-                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
-                    <div className="text-primary text-2xl">⏱️</div>
+                  <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-3 text-center sm:gap-2 sm:p-4">
+                    <div className="text-primary text-xl sm:text-2xl">⏱️</div>
                     <div className="text-muted-foreground text-xs">مدة التنفيذ</div>
-                    <div className="text-foreground text-base font-bold">
+                    <div className="text-foreground text-sm font-bold sm:text-base">
                       {Math.round(card.implementationDurationDays / 30)} شهر
                     </div>
                   </div>
@@ -650,27 +680,27 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
 
                 {/* Template Number */}
                 {card.templateNumber && (
-                  <div className="border-border flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center">
-                    <div className="text-primary text-2xl">📋</div>
+                  <div className="border-border flex flex-col items-center gap-1 rounded-lg border bg-card p-3 text-center sm:gap-2 sm:p-4">
+                    <div className="text-primary text-xl sm:text-2xl">📋</div>
                     <div className="text-muted-foreground text-xs">رقم محضر</div>
-                    <div className="text-foreground text-base font-bold">{card.templateNumber}</div>
+                    <div className="text-foreground text-sm font-bold sm:text-base">{card.templateNumber}</div>
                   </div>
                 )}
               </div>
 
               {/* Description Section */}
               {description && (
-                <div className="border-border space-y-3 rounded-lg border bg-muted/20 p-5">
-                  <h3 className="text-foreground text-right text-lg font-bold">وصف المشروع</h3>
+                <div className="border-border space-y-2 rounded-lg border bg-muted/20 p-3 sm:space-y-3 sm:p-4 md:p-5">
+                  <h3 className="text-foreground text-right text-base font-bold sm:text-lg">وصف المشروع</h3>
                   <p className="text-foreground text-right text-sm leading-relaxed">{description}</p>
                 </div>
               )}
 
               {/* Project-Specific Details Section */}
               {card.details && (
-                <div className="border-border space-y-3 rounded-lg border bg-muted/20 p-5">
-                  <h3 className="text-foreground text-right text-lg font-bold">التفاصيل الفنية</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="border-border space-y-2 rounded-lg border bg-muted/20 p-3 sm:space-y-3 sm:p-4 md:p-5">
+                  <h3 className="text-foreground text-right text-base font-bold sm:text-lg">التفاصيل الفنية</h3>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {/* Mosque Details */}
                     {card.type === 'mosque' && (
                       <>
@@ -749,7 +779,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className={cn(
+            "inset-0 z-40 bg-black/40 backdrop-blur-sm",
+            isMobile ? "fixed" : "absolute"
+          )}
           onClick={onClose}
           aria-label="Close modal"
         />
@@ -758,15 +791,18 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
+          className={cn(
+            "pointer-events-none inset-0 z-50 flex items-center justify-center",
+            isMobile ? "fixed p-0" : "absolute p-2 sm:p-4 md:p-6"
+          )}
         >
           <div
             dir="rtl"
             className={cn(
               'pointer-events-auto',
-              'bg-background border-border rounded-xl border',
+              'bg-background border-border rounded-lg border sm:rounded-xl',
               'shadow-2xl',
-              'w-full max-w-md max-h-[90vh] overflow-y-auto',
+              'w-full max-w-full max-h-[95vh] overflow-y-auto sm:max-w-md sm:max-h-[90vh]',
               'scrollbar-thin'
             )}
             onClick={(e) => e.stopPropagation()}
@@ -851,7 +887,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className={cn(
+            "inset-0 z-40 bg-black/40 backdrop-blur-sm",
+            isMobile ? "fixed" : "absolute"
+          )}
           onClick={onClose}
           aria-label="Close modal"
         />
@@ -860,15 +899,18 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
+          className={cn(
+            "pointer-events-none inset-0 z-50 flex items-center justify-center",
+            isMobile ? "fixed p-0" : "absolute p-2 sm:p-4 md:p-6"
+          )}
         >
           <div
             dir="rtl"
             className={cn(
               'pointer-events-auto',
-              'bg-background border-border rounded-xl border',
+              'bg-background border-border rounded-lg border sm:rounded-xl',
               'shadow-2xl',
-              'w-full max-w-md max-h-[90vh] overflow-y-auto',
+              'w-full max-w-full max-h-[95vh] overflow-y-auto sm:max-w-md sm:max-h-[90vh]',
               'scrollbar-thin'
             )}
             onClick={(e) => e.stopPropagation()}
@@ -963,7 +1005,10 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          className={cn(
+            "inset-0 z-40 bg-black/40 backdrop-blur-sm",
+            isMobile ? "fixed" : "absolute"
+          )}
           onClick={onClose}
           aria-label="Close modal"
         />
@@ -972,15 +1017,18 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center p-6"
+          className={cn(
+            "pointer-events-none inset-0 z-50 flex items-center justify-center",
+            isMobile ? "fixed p-0" : "absolute p-2 sm:p-4 md:p-6"
+          )}
         >
           <div
             dir="rtl"
             className={cn(
               'pointer-events-auto',
-              'bg-background border-border rounded-xl border',
+              'bg-background border-border rounded-lg border sm:rounded-xl',
               'shadow-2xl',
-              'w-full max-w-md max-h-[90vh] overflow-y-auto',
+              'w-full max-w-full max-h-[95vh] overflow-y-auto sm:max-w-md sm:max-h-[90vh]',
               'scrollbar-thin'
             )}
             onClick={(e) => e.stopPropagation()}

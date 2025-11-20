@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useRoomContext, useVoiceAssistant } from '@livekit/components-react';
 import {
   useReactTable,
@@ -19,6 +19,23 @@ import {
 } from '@/components/ui/table';
 import { OrderModal } from '@/components/app/new-ui/views/orders/order-modal';
 import { cn } from '@/lib/utils';
+
+// Hook to detect mobile breakpoint
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return isMobile;
+}
 
 // Type definitions based on FRONTEND_TYPES_README.md
 interface DonationOrder {
@@ -136,7 +153,85 @@ const getStatusColor = (status: string): string => {
   return colors[status] || 'bg-gray-100 text-gray-700';
 };
 
+// Mobile Card Components
+interface OrderCardProps {
+  order: any;
+  type: 'donation' | 'sponsorship';
+  onClick: () => void;
+}
+
+function OrderCard({ order, type, onClick }: OrderCardProps) {
+  const getItemTitle = () => {
+    if (type === 'sponsorship') {
+      const item = order.sponsorship_item;
+      if (!item) return 'غير محدد';
+      return getArabicText(item.details?.name) || 'غير محدد';
+    } else {
+      const item = order.donation_item;
+      if (!item) return 'غير محدد';
+      if (item.type === 'general') return 'تبرع عام';
+      return getArabicText(item.details?.name) || 'غير محدد';
+    }
+  };
+
+  const getItemCategory = () => {
+    if (type === 'sponsorship') {
+      const category = order.sponsorship_item?.category;
+      return category ? translateCategory(category) : '';
+    } else {
+      const donationType = order.donation_item?.type;
+      return donationType ? translateDonationType(donationType) : '';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={onClick}
+      className={cn(
+        'bg-card border-border hover:border-primary rounded-lg border p-4 cursor-pointer transition-all',
+        'hover:shadow-md'
+      )}
+    >
+      <div className="space-y-3">
+        {/* Header: Title and Status */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-foreground text-sm font-semibold line-clamp-2 text-right">
+              {getItemTitle()}
+            </h3>
+            {getItemCategory() && (
+              <p className="text-muted-foreground text-xs mt-1 text-right">{getItemCategory()}</p>
+            )}
+          </div>
+          <span className={cn('text-xs px-2 py-1 rounded-md whitespace-nowrap', getStatusColor(order.status))}>
+            {translateStatus(order.status)}
+          </span>
+        </div>
+
+        {/* Details Grid */}
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+          <div className="text-right">
+            <div className="text-muted-foreground text-xs">المبلغ</div>
+            <div className="text-foreground text-sm font-semibold">{order.amountQar} ر.ق</div>
+          </div>
+          <div className="text-right">
+            <div className="text-muted-foreground text-xs">الدفع</div>
+            <div className="text-foreground text-sm">{translatePaymentSchedule(order.paymentSchedule)}</div>
+          </div>
+          <div className="text-right col-span-2">
+            <div className="text-muted-foreground text-xs">التاريخ</div>
+            <div className="text-foreground text-sm">{formatDate(order.createdAt)}</div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
+  const isMobile = useIsMobile();
   const room = useRoomContext();
   const { agent } = useVoiceAssistant();
   const [selectedOrder, setSelectedOrder] = useState<{
@@ -396,15 +491,82 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<'sponsorships' | 'donations'>('sponsorships');
+
   return (
     <div className="relative h-full w-full flex flex-col">
       {/* Title Section */}
-      <div className="bg-background/95 backdrop-blur-sm border-b border-border p-4 z-20">
-        <h2 className="text-xl font-bold text-foreground text-center">طلباتي</h2>
+      <div className="bg-background/95 backdrop-blur-sm border-b border-border p-3 z-20 md:p-4">
+        <h2 className="text-lg font-bold text-foreground text-center md:text-xl">طلباتي</h2>
       </div>
 
-      {/* Vertically stacked tables */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Mobile: Tabs */}
+      {isMobile && (
+        <div className="flex border-b border-border bg-background">
+          <button
+            onClick={() => setActiveTab('sponsorships')}
+            className={cn(
+              'flex-1 px-4 py-3 text-sm font-semibold transition-colors',
+              activeTab === 'sponsorships'
+                ? 'text-primary border-b-2 border-primary bg-muted/30'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            الكفالات ({sponsorships.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('donations')}
+            className={cn(
+              'flex-1 px-4 py-3 text-sm font-semibold transition-colors',
+              activeTab === 'donations'
+                ? 'text-primary border-b-2 border-primary bg-muted/30'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            التبرعات ({donations.length})
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
+      {isMobile ? (
+        /* Mobile: Card view with tabs */
+        <div className="flex-1 overflow-auto p-3">
+          {activeTab === 'sponsorships' ? (
+            <div className="space-y-3" dir="rtl">
+              {sponsorships.length > 0 ? (
+                sponsorships.map((sponsorship) => (
+                  <OrderCard
+                    key={sponsorship.id}
+                    order={sponsorship}
+                    type="sponsorship"
+                    onClick={() => handleOrderClick(sponsorship, 'sponsorship')}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">لا توجد كفالات</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3" dir="rtl">
+              {donations.length > 0 ? (
+                donations.map((donation) => (
+                  <OrderCard
+                    key={donation.id}
+                    order={donation}
+                    type="donation"
+                    onClick={() => handleOrderClick(donation, 'donation')}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-8">لا توجد تبرعات</p>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Desktop: Vertically stacked tables */
+        <div className="flex-1 flex flex-col overflow-hidden">
         {/* Sponsorships Table */}
         <div className="flex flex-col border-b border-border overflow-hidden h-1/2">
           <div className="bg-background/95 px-6 pt-4 pb-3">
@@ -490,7 +652,8 @@ export function OrdersView({ donations, sponsorships }: OrdersViewProps) {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Modal */}
       <AnimatePresence>

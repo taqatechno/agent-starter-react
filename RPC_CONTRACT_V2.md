@@ -1088,43 +1088,114 @@ interface SponsorshipOrder {
 
 **Request Payload:**
 
-```json
-{
-  "message": "string",
-  "timestamp": "string (ISO 8601)",
-  "topic": "string"
-}
-```
+The payload structure is flexible and depends on the event type from the external server. All fields from the external server are forwarded to the agent.
 
-**Payload Fields:**
-- `message` (string, required): The message content from external server
-- `timestamp` (string, required): ISO 8601 timestamp when data was received
-- `topic` (string, optional): Topic/category of the data (default: "default")
+**Common Payload Fields:**
+- `type` (string, optional): Event type identifier (e.g., "payment:success", "payment:failed")
+- `timestamp` (string, required): ISO 8601 timestamp
+- Additional fields vary by event type
 
 **Response:**
 - Success: `"success"`
 - Error: `"error: <message>"`
 
-**Example - External Data Received:**
+**Example - Payment Success Event:**
 ```json
 // Request
 {
-  "message": "New donation received: 500 QAR",
-  "timestamp": "2025-01-19T10:30:00.584Z",
-  "topic": "donations"
+  "type": "payment:success",
+  "orderId": "4955c136-0b2a-4712-8714-ab5151788232",
+  "amount": "500.00",
+  "transactionId": "d3892e4f-07f5-437a-80f6-e5615e2579fb",
+  "timestamp": "2025-11-19T14:59:59.355Z"
 }
 
 // Expected Response
 "success"
 ```
 
-**Example - Default Topic:**
+**Example - Payment Failed Event:**
+```json
+// Request
+{
+  "type": "payment:failed",
+  "orderId": "4955c136-0b2a-4712-8714-ab5151788232",
+  "amount": "500.00",
+  "errorCode": "insufficient_funds",
+  "errorMessage": "Payment declined",
+  "timestamp": "2025-11-19T15:00:00.000Z"
+}
+
+// Expected Response
+"success"
+```
+
+**Example - Test Message (Legacy):**
 ```json
 // Request
 {
   "message": "Hello frontend, this is a test!",
-  "timestamp": "2025-01-19T09:01:55.584Z",
-  "topic": "default"
+  "timestamp": "2025-01-19T09:01:55.584Z"
+}
+
+// Expected Response
+"success"
+```
+
+**Use Case:**
+- External payment gateway/server broadcasts events to LiveKit room using `RoomService.sendData()`
+- Frontend DataListener receives the data packet and forwards complete payload to agent
+- Agent processes payment notifications and updates conversation state
+- Typical event types: "payment:success", "payment:failed", "payment:pending"
+- Agent can update order status, confirm with user, or handle errors conversationally
+
+**Implementation Notes:**
+- Frontend forwards ALL fields from external server without filtering
+- Agent should validate required fields based on event type
+- Payload structure is intentionally flexible to support different external systems
+- `timestamp` is the only guaranteed field across all event types
+
+---
+
+### agent.initiateDonation
+
+**Purpose**: Notify agent that user clicked donate/sponsor button on a card modal (intent to donate)
+
+**Request Payload:**
+
+```json
+{
+  "cardId": "string (uuid)",
+  "cardName": "string"
+}
+```
+
+**Payload Fields:**
+- `cardId` (string, required): UUID of the card user wants to donate to
+- `cardName` (string, required): Display name of the card (Arabic or English)
+
+**Response:**
+- Success: `"success"`
+- Error: `"error: <message>"`
+
+**Example - User Clicks Donate on Sponsorship:**
+```json
+// Request
+{
+  "cardId": "550e8400-e29b-41d4-a716-446655440000",
+  "cardName": "محمد"
+}
+
+// Expected Response
+"success"
+```
+
+**Example - User Clicks Donate on Project:**
+```json
+// Request
+{
+  "cardId": "650e8400-e29b-41d4-a716-446655440001",
+  "cardName": "جامع الرحمة الكبير"
 }
 
 // Expected Response
@@ -1133,20 +1204,24 @@ interface SponsorshipOrder {
 
 **Example - Error:**
 ```json
-// Request (missing message)
+// Request (missing cardId)
 {
-  "timestamp": "2025-01-19T10:30:00Z"
+  "cardName": "Test Card"
 }
 
 // Expected Response
-"error: missing message"
+"error: missing cardId"
 ```
 
 **Use Case:**
-- External servers can broadcast data to the LiveKit room using `RoomService.sendData()`
-- Frontend DataListener receives the data packet and forwards it to the agent via this RPC
-- Agent can process the external data and take appropriate actions
-- Typical topics: "donations", "orders", "notifications", "alerts"
+- User browses cards in the UI (sponsorships, projects, charities, atonements)
+- User opens a card modal to view details
+- User clicks the "تبرع الآن" (Donate Now) button
+- Frontend sends this RPC to indicate donation intent
+- Agent can then initiate conversational payment flow (ask for amount, payment method, etc.)
+- Simple intent signal - agent handles all payment details through conversation
+
+**Note:** This is an intent indicator, not a payment submission. The agent will ask the user for payment details (amount, schedule, method) conversationally after receiving this RPC.
 
 ---
 

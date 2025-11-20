@@ -179,7 +179,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         whileHover="hover"
         whileTap="tap"
         className={cn(
-          'w-full max-w-[320px]',
+          'w-full max-w-full sm:max-w-[320px]',
           'flex flex-col overflow-hidden',
           'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
@@ -190,7 +190,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         {/* Card content wrapper - clickable area for modal */}
         <div onClick={onClick} className="flex-1">
           {/* Top section with avatar and info */}
-          <div className="flex gap-3 p-4">
+          <div className="flex gap-2 p-3 sm:gap-3 sm:p-4">
             {/* Avatar */}
             <div className="flex-shrink-0">
               <img
@@ -203,13 +203,13 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
             {/* Person Info */}
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               {/* Name */}
-              <h3 className="text-foreground line-clamp-2 text-right text-base font-bold leading-tight">
+              <h3 className="text-foreground line-clamp-2 text-right text-sm font-bold leading-tight sm:text-base">
                 {name}
               </h3>
 
               {/* Age and Gender */}
               {(age || gender) && (
-                <div className="text-muted-foreground text-right text-sm">
+                <div className="text-muted-foreground text-right text-xs sm:text-sm">
                   {age && <span>{age} </span>}
                   {gender && <span>{getGenderLabel(gender)}</span>}
                 </div>
@@ -233,10 +233,10 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
           </div>
 
           {/* Amount Section */}
-          <div className="px-4 pb-3">
+          <div className="px-3 pb-2 sm:px-4 sm:pb-3">
             <div className="text-muted-foreground text-right text-xs">تبرع الكفالة الشهرية</div>
             {amount && (
-              <div className="text-foreground mt-1 text-right text-lg font-bold">
+              <div className="text-foreground mt-1 text-right text-base font-bold sm:text-lg">
                 {amount.toLocaleString()} ريال
               </div>
             )}
@@ -244,7 +244,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         </div>
 
         {/* Sponsor Button - separate from clickable area */}
-        <div className="border-t border-border p-3">
+        <div className="border-t border-border p-2 sm:p-3">
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevent card click when clicking button
@@ -338,7 +338,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         whileHover="hover"
         whileTap="tap"
         className={cn(
-          'w-full max-w-[320px]',
+          'w-full max-w-full sm:max-w-[320px]',
           'flex flex-col overflow-hidden',
           'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
@@ -349,7 +349,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         {/* Card content wrapper - clickable area for modal */}
         <div onClick={onClick} className="flex-1">
           {/* Top section with image and info */}
-          <div className="flex gap-3 p-4">
+          <div className="flex gap-2 p-3 sm:gap-3 sm:p-4">
             {/* Project Image */}
             <div className="flex-shrink-0">
               <img
@@ -362,7 +362,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
             {/* Project Info */}
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               {/* Title */}
-              <h3 className="text-foreground line-clamp-2 text-right text-base font-bold leading-tight">
+              <h3 className="text-foreground line-clamp-2 text-right text-sm font-bold leading-tight sm:text-base">
                 {name}
               </h3>
 
@@ -459,7 +459,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         }}
         whileHover="hover"
         className={cn(
-          'w-full max-w-[700px]',
+          'w-full max-w-full md:max-w-[700px]',
           'flex flex-col',
           'bg-card border-border hover:border-primary rounded-xl border',
           'shadow-md hover:shadow-xl',
@@ -467,31 +467,31 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         )}
       >
         {/* Header with category badge */}
-        <div className="flex items-start justify-between border-b border-border p-6 pb-4">
+        <div className="flex items-start justify-between border-b border-border p-4 pb-3 md:p-6 md:pb-4">
           <div className="flex-1" />
-          <span className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-3 py-1.5 text-sm font-medium">
+          <span className="bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 rounded-md px-2.5 py-1 text-xs font-medium md:px-3 md:py-1.5 md:text-sm">
             {category}
           </span>
         </div>
 
         {/* Question section */}
-        <div className="border-b border-border p-6">
+        <div className="border-b border-border p-4 md:p-6">
           <div className="mb-2 flex items-center justify-end gap-2">
-            <span className="text-muted-foreground text-sm font-medium">السؤال</span>
-            <span className="text-primary text-xl">❓</span>
+            <span className="text-muted-foreground text-xs font-medium md:text-sm">السؤال</span>
+            <span className="text-primary text-lg md:text-xl">❓</span>
           </div>
-          <p className="text-foreground text-right text-xl font-bold leading-relaxed">
+          <p className="text-foreground text-right text-lg font-bold leading-relaxed md:text-xl">
             {question}
           </p>
         </div>
 
         {/* Answer section */}
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           <div className="mb-2 flex items-center justify-end gap-2">
-            <span className="text-muted-foreground text-sm font-medium">الإجابة</span>
-            <span className="text-primary text-xl">💡</span>
+            <span className="text-muted-foreground text-xs font-medium md:text-sm">الإجابة</span>
+            <span className="text-primary text-lg md:text-xl">💡</span>
           </div>
-          <p className="text-foreground text-right text-base leading-relaxed">
+          <p className="text-foreground text-right text-sm leading-relaxed md:text-base">
             {answer}
           </p>
         </div>
@@ -513,7 +513,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         whileTap="tap"
         onClick={onClick}
         className={cn(
-          'w-[200px]',
+          'w-full max-w-[240px] sm:w-[200px]',
           'flex flex-col overflow-hidden',
           'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
@@ -522,7 +522,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         )}
       >
         {/* Horizontal layout: Image + Content */}
-        <div className="flex gap-2 p-3">
+        <div className="flex gap-2 p-2.5 sm:p-3">
           {/* Charity Image - 80x80px */}
           <div className="flex-shrink-0">
             <img
@@ -575,7 +575,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         whileTap="tap"
         onClick={onClick}
         className={cn(
-          'w-[200px]',
+          'w-full max-w-[240px] sm:w-[200px]',
           'flex flex-col overflow-hidden',
           'bg-card border-border hover:border-primary rounded-xl border',
           'cursor-pointer',
@@ -584,7 +584,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
         )}
       >
         {/* Horizontal layout: Image + Content */}
-        <div className="flex gap-2 p-3">
+        <div className="flex gap-2 p-2.5 sm:p-3">
           {/* Atonement Image - 80x80px */}
           <div className="flex-shrink-0">
             <img

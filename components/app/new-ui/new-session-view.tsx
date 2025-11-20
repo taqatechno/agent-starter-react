@@ -7,6 +7,26 @@ import type { AppConfig } from '@/app-config';
 import { AgentSection } from '@/components/app/new-ui/agent-section';
 import { ContentSection } from '@/components/app/new-ui/content-section';
 
+// Hook to detect desktop breakpoint (lg: 1024px)
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
+    // Set initial value
+    setIsDesktop(mediaQuery.matches);
+
+    // Listen for changes
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mediaQuery.addEventListener('change', handler);
+
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return isDesktop;
+}
+
 // Card interface for UI components
 export interface Card {
   id: string | number;
@@ -22,6 +42,7 @@ interface NewSessionViewProps {
 
 export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionViewProps) {
   const room = useRoomContext();
+  const isDesktop = useIsDesktop();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [contentSection, setContentSection] = useState<{
     isVisible: boolean;
@@ -257,22 +278,30 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
   };
 
   return (
-    <div className="bg-background relative flex h-full w-full flex-row overflow-hidden">
-      {/* Logo - fixed at top-left */}
-      <div className="fixed top-6 left-6 z-50">
+    <div className="bg-background relative flex h-full w-full flex-col overflow-x-hidden lg:flex-row">
+      {/* Logo - fixed at top-left with responsive sizing */}
+      <div className="fixed top-4 left-4 z-50 lg:top-6 lg:left-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={appConfig.logo}
           alt={`${appConfig.companyName} Logo`}
-          className="h-12 w-auto rounded-full shadow-md transition-transform duration-300 hover:scale-110"
+          className="h-10 w-auto rounded-full shadow-md transition-transform duration-300 hover:scale-110 lg:h-12"
         />
       </div>
 
-      {/* Agent Section - animates width between 100% and 40% */}
+      {/* Agent Section - responsive layout (vertical mobile, horizontal desktop) */}
       <motion.div
-        className="relative h-full"
-        initial={{ width: '100%' }}
-        animate={{ width: contentSection.isVisible ? '40%' : '100%' }}
+        className="relative w-full lg:h-full"
+        initial={
+          isDesktop
+            ? { width: '100%', height: '100%' }
+            : { height: '100%', width: '100%' }
+        }
+        animate={
+          isDesktop
+            ? { width: contentSection.isVisible ? '40%' : '100%', height: '100%' }
+            : { height: contentSection.isVisible ? '40%' : '100%', width: '100%' }
+        }
         transition={{
           type: 'spring',
           stiffness: 200,
@@ -286,13 +315,25 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
         />
       </motion.div>
 
-      {/* Content Section - slides in from right */}
+      {/* Content Section - slides up on mobile, slides in from right on desktop */}
       {contentSection.isVisible && (
         <motion.div
-          className="relative h-full"
-          initial={{ width: '0%', opacity: 0 }}
-          animate={{ width: '60%', opacity: 1 }}
-          exit={{ width: '0%', opacity: 0 }}
+          className="relative w-full lg:h-full"
+          initial={
+            isDesktop
+              ? { width: '0%', opacity: 0, height: '100%' }
+              : { height: '0%', opacity: 0, width: '100%' }
+          }
+          animate={
+            isDesktop
+              ? { width: '60%', opacity: 1, height: '100%' }
+              : { height: '60%', opacity: 1, width: '100%' }
+          }
+          exit={
+            isDesktop
+              ? { width: '0%', opacity: 0, height: '100%' }
+              : { height: '0%', opacity: 0, width: '100%' }
+          }
           transition={{
             type: 'spring',
             stiffness: 200,

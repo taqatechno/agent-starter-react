@@ -175,13 +175,13 @@ export function CardsView({ cards, entityType }: CardsViewProps) {
   return (
     <div className="relative h-full w-full flex flex-col">
       {/* Title Section - Cards-specific */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border p-4 z-20">
-        <h2 className="text-xl font-bold text-foreground text-center">البطاقات</h2>
+      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border p-3 z-20 md:p-4">
+        <h2 className="text-lg font-bold text-foreground text-center md:text-xl">البطاقات</h2>
       </div>
 
-      {/* Background layer - reduced opacity when modal is open */}
+      {/* Scrollable content area - reduced opacity when modal is open */}
       <motion.div
-        className={cn('absolute inset-0 flex items-center justify-center p-6 pt-20')}
+        className={cn('flex-1 overflow-y-auto overflow-x-hidden')}
         animate={{
           opacity: selectedCardId !== null ? 0.3 : 1,
           filter: selectedCardId !== null ? 'blur(4px)' : 'blur(0px)',

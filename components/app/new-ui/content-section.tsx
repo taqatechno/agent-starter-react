@@ -14,16 +14,16 @@ interface ContentSectionProps {
 
 export function ContentSection({ contentType, data, onClose }: ContentSectionProps) {
   return (
-    <div className="bg-background border-border relative h-full w-full overflow-hidden border-l">
-      {/* Close button - fixed at top-right */}
+    <div className="bg-background border-border relative h-full w-full overflow-hidden border-t lg:border-l lg:border-t-0">
+      {/* Close button - responsive positioning and sizing */}
       <motion.button
         type="button"
         onClick={onClose}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className={cn(
-          'absolute top-4 right-4 z-30',
-          'rounded-full p-2',
+          'absolute top-3 right-3 z-30 lg:top-4 lg:right-4',
+          'rounded-full p-1.5 lg:p-2',
           'bg-background/90 backdrop-blur-sm',
           'border-border border',
           'text-muted-foreground hover:text-foreground',
@@ -32,7 +32,7 @@ export function ContentSection({ contentType, data, onClose }: ContentSectionPro
         )}
         aria-label="Close content section"
       >
-        <X className="h-5 w-5" weight="bold" />
+        <X className="h-4 w-4 lg:h-5 lg:w-5" weight="bold" />
       </motion.button>
 
       {/* Route to appropriate view - each view is self-contained */}

@@ -29,13 +29,13 @@ export function CardGrid({ cards, entityType, onCardClick }: CardGridProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex h-full w-full items-center justify-center p-4"
+      className="flex w-full flex-col items-center p-3 md:p-4"
     >
       <div
         className={
           useGridLayout
-            ? "grid w-full max-w-7xl grid-cols-[repeat(auto-fit,minmax(300px,320px))] justify-center gap-4"
-            : "flex max-w-4xl flex-row flex-wrap items-center justify-center gap-4"
+            ? "grid w-full max-w-7xl grid-cols-1 justify-center gap-3 sm:grid-cols-[repeat(auto-fit,minmax(280px,320px))] md:gap-4"
+            : "flex w-full max-w-4xl flex-row flex-wrap items-center justify-center gap-3 md:gap-4"
         }
       >
         {cards.map((card) => (
