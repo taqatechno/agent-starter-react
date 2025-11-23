@@ -339,7 +339,7 @@ export function CardModal({ card, entityType, onClose }: CardModalProps) {
               {/* Avatar/Illustration */}
               <div className="flex h-full w-full items-center justify-center">
                 <img
-                  src="https://placehold.co/200x200/e2e8f0/64748b?text=Avatar"
+                  src="./avatar.jpg"
                   alt={name}
                   className="h-32 w-32 rounded-full object-cover"
                 />

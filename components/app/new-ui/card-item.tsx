@@ -194,7 +194,7 @@ export function CardItem({ card, entityType, onClick }: CardItemProps) {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <img
-                src={`https://placehold.co/100x100/e2e8f0/64748b?text=Avatar`}
+                src={`./avatar.jpg`}
                 alt={name}
                 className="h-[100px] w-[100px] rounded-lg object-cover"
               />
