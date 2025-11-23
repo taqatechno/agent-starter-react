@@ -24,10 +24,9 @@ interface AgentSectionProps {
   isChatOpen: boolean;
   onChatToggle: () => void;
   appConfig: AppConfig;
-  contentSectionIsVisible: boolean;
 }
 
-export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSectionIsVisible }: AgentSectionProps) {
+export function AgentSection({ isChatOpen, onChatToggle, appConfig }: AgentSectionProps) {
   const {
     state: agentState,
     audioTrack: agentAudioTrack,
@@ -65,14 +64,6 @@ export function AgentSection({ isChatOpen, onChatToggle, appConfig, contentSecti
       console.log('🔌 Unregistered loading status listener');
     };
   }, []);
-
-  // Auto-dismiss loading when content section opens (permanent dismissal)
-  useEffect(() => {
-    if (contentSectionIsVisible && isLoading) {
-      setIsLoading(false);
-      console.log('✅ Loading dismissed due to content section opening');
-    }
-  }, [contentSectionIsVisible, isLoading]);
 
   // Auto-scroll chat transcript to bottom
   useEffect(() => {

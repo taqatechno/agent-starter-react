@@ -103,6 +103,13 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
             },
           });
 
+          // Turn loading OFF when showing cards
+          window.dispatchEvent(
+            new CustomEvent('livekit-loading-status', {
+              detail: { status: false }
+            })
+          );
+
           console.log(`✅ Displaying ${payload.cards.length} ${payload.Type} cards`);
 
           // Return success response per contract with extracted titles
@@ -195,6 +202,13 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
               sponsorships: payload.sponsorships,
             },
           });
+
+          // Turn loading OFF when showing orders
+          window.dispatchEvent(
+            new CustomEvent('livekit-loading-status', {
+              detail: { status: false }
+            })
+          );
 
           console.log(
             `✅ Displaying ${payload.donations.length} donations and ${payload.sponsorships.length} sponsorships`
@@ -312,7 +326,6 @@ export function NewSessionView({ appConfig, onAnimationComplete }: NewSessionVie
           isChatOpen={isChatOpen}
           onChatToggle={() => setIsChatOpen(!isChatOpen)}
           appConfig={appConfig}
-          contentSectionIsVisible={contentSection.isVisible}
         />
       </motion.div>
 
